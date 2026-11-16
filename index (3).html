@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#E8E6E1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="format-detection" content="telephone=no">
+<title>Roda da Rima</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Permanent+Marker&family=Archivo:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--ink:#1a1a1a;--paper:#E8E6E1;--or:#F5A623;--red:#E64B55;--green:#18A36A;--blue:#3C7DD9;--wine:#8E2E43;--lilac:#B9A9D9;--pad:clamp(12px,4.5vw,20px)}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;overscroll-behavior:none}
+body{position:fixed;inset:0;background-color:var(--paper);background-image:radial-gradient(rgba(0,0,0,.07) .8px,transparent 1.1px);background-size:5px 5px;font-family:'Archivo',sans-serif;color:var(--ink);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+input,textarea,select{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default;touch-action:auto}
+img,svg{-webkit-user-drag:none}
+#app{position:absolute;inset:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;
+  padding:max(var(--pad),env(safe-area-inset-top)) max(var(--pad),env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(var(--pad),env(safe-area-inset-left));display:flex;flex-direction:column}
+.screen{width:100%;max-width:440px;margin:0 auto;flex:1 0 auto;display:flex;flex-direction:column;gap:clamp(8px,1.6vh,12px)}
+.screen.wide{max-width:640px}
+.bang{font-family:'Bangers',sans-serif;letter-spacing:1px}
+.title3d{font-family:'Bangers',sans-serif;letter-spacing:2px;color:var(--or);-webkit-text-stroke:2.5px var(--ink);text-shadow:1px 1px 0 var(--ink),2px 2px 0 var(--ink),3px 3px 0 var(--ink),4px 4px 0 var(--ink),5px 5px 0 var(--ink),6px 6px 0 var(--ink);line-height:.9;margin:0;text-align:center}
+.t-xl{font-size:clamp(50px,24vw,96px);font-size:clamp(50px,min(24vw,11.5dvh),96px)}
+.t-l{font-size:clamp(34px,13vw,54px);font-size:clamp(34px,min(13vw,7dvh),54px)}
+.t-m{font-size:clamp(30px,11.5vw,52px);font-size:clamp(30px,min(11.5vw,6.5dvh),52px)}
+.marker{font-family:'Permanent Marker',cursive}
+.card{background:#fff;border:3px solid var(--ink);border-radius:20px;box-shadow:5px 5px 0 var(--ink)}
+.pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:4px 12px;box-shadow:3px 3px 0 var(--ink);font-weight:800;font-size:14px;white-space:nowrap}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:clamp(50px,7.2vh,58px);padding:6px 12px;border:3px solid var(--ink);border-radius:16px;box-shadow:5px 5px 0 var(--ink);font-family:'Bangers',sans-serif;font-size:clamp(22px,7.2vw,28px);letter-spacing:2px;color:var(--ink);background:var(--or);cursor:pointer;transition:transform .08s,box-shadow .08s;text-decoration:none}
+.btn.sm{min-height:46px;font-size:clamp(17px,5.4vw,21px);letter-spacing:1px;box-shadow:4px 4px 0 var(--ink)}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+.btn:disabled{opacity:.55;cursor:default}
+.opt{display:flex;align-items:center;gap:12px;width:100%;min-height:clamp(50px,7.2vh,58px);padding:8px 12px;background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:4px 4px 0 var(--ink);font-family:'Archivo',sans-serif;font-weight:800;font-size:clamp(15px,4.5vw,17px);text-align:left;color:var(--ink);cursor:pointer;line-height:1.2}
+.opt:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.opt .let{flex:0 0 32px;height:32px;border-radius:50%;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-family:'Bangers',sans-serif;font-size:19px}
+.opt.right{background:#BDEBD3}.opt.wrong{background:#F6C3C7}.opt.dim{opacity:.5}
+.row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.bubble{background:#fff;border:3px solid var(--ink);border-radius:22px;padding:8px 14px;font-family:'Bangers',sans-serif;font-size:clamp(15px,4.8vw,19px);letter-spacing:.5px;line-height:1.1}
+.timer{height:14px;background:#fff;border:3px solid var(--ink);border-radius:999px;overflow:hidden;flex:0 0 auto}
+.timer i{display:block;height:100%;background:var(--or);border-right:3px solid var(--ink);transition:width 1s linear}
+.wheelwrap{position:relative;width:min(300px,74vw);width:min(300px,74vw,40dvh);aspect-ratio:1/1;margin:8px auto 0;flex:0 0 auto}
+#wheel{width:100%;height:100%;display:block;transition:transform 3.4s cubic-bezier(.12,.75,.18,1)}
+.pointer{position:absolute;left:50%;top:-6%;width:13%;transform:translateX(-50%)}
+.hub{position:absolute;left:34.5%;top:34.5%;width:31%;height:31%;border-radius:50%;background:#fff;border:4px solid var(--ink);box-shadow:4px 4px 0 var(--ink);font-family:'Bangers',sans-serif;font-size:clamp(18px,7.5vw,28px);letter-spacing:1px;cursor:pointer;color:var(--ink);padding:0}
+.avatar{width:58px;height:58px;border-radius:50%;border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);overflow:hidden;flex:0 0 auto;background:#fff}
+.avatar svg{display:block}
+.avrow{display:flex;justify-content:center;gap:clamp(4px,1.6vw,8px)}
+.avrow .avatar{width:min(48px,12.6vw);height:min(48px,12.6vw)}
+.small{font-size:12px;font-weight:700}
+.stack{display:flex;flex-direction:column;gap:12px}
+.fade{animation:pop .25s ease-out}
+@keyframes pop{from{transform:scale(.97);opacity:0}to{transform:none;opacity:1}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}50%{transform:translateX(6px)}75%{transform:translateX(-3px)}}
+.secs{margin-left:auto;width:50px;height:50px;border-radius:50%;background:var(--or);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 50px}
+.crew{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.crewcell{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0}
+.crewav{position:relative;width:100%;max-width:56px;aspect-ratio:1/1;border-radius:50%;border:2.5px dashed var(--ink);overflow:hidden;background:#fff}
+.crewav svg{filter:grayscale(1);opacity:.35}
+.crewav.on{border-style:solid;box-shadow:2px 2px 0 var(--ink)}
+.crewav.on svg{filter:none;opacity:1}
+.crewname{font-size:clamp(8.2px,2.45vw,10.5px);font-weight:800;text-align:center;line-height:1.1;width:100%;white-space:nowrap;letter-spacing:-.2px}
+.pick{display:flex;align-items:center;gap:14px;width:100%;padding:10px 14px;border:3px solid var(--ink);border-radius:18px;box-shadow:5px 5px 0 var(--ink);cursor:pointer;font-family:'Archivo',sans-serif}
+.pick:disabled{opacity:.45;cursor:default}
+.pick:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--ink)}
+.fl{display:flex;flex-direction:column;gap:6px;font-weight:800;font-size:14px}
+.fl input,.fl textarea,.fl select{font:500 16px 'Archivo',sans-serif;color:var(--ink);background:#fff;border:2.5px solid var(--ink);border-radius:12px;padding:10px 12px;width:100%;resize:vertical}
+.fl input:focus,.fl textarea:focus,.fl select:focus{outline:3px solid var(--or);outline-offset:1px}
+.check{display:flex;align-items:center;gap:10px;font-weight:800;font-size:14px;min-height:44px}
+.check input{width:22px;height:22px;accent-color:var(--green)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink);margin-right:6px;vertical-align:-1px}
+.iconbtn{width:44px;height:44px;flex:0 0 44px;border:3px solid var(--ink);border-radius:12px;background:#fff;box-shadow:3px 3px 0 var(--ink);font-size:28px;line-height:1;cursor:pointer;color:var(--ink);padding:0}
+.mini{background:#fff;border:2px solid var(--ink);border-radius:10px;padding:6px 10px;font:800 13px 'Archivo',sans-serif;cursor:pointer;min-height:38px;color:var(--ink)}
+.mini.g{background:#BDEBD3}.mini.r{background:#F6C3C7}
+.tag{display:inline-block;border:2px solid var(--ink);border-radius:999px;padding:1px 8px;font-weight:800;font-size:12px;white-space:nowrap}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:2.5px solid var(--ink);border-radius:999px;background:#fff;padding:7px 12px;font:800 14px 'Archivo',sans-serif;cursor:pointer;color:var(--ink);min-height:40px}
+.tab.on{background:var(--ink);color:#fff}
+.stat{background:#fff;border:3px solid var(--ink);border-radius:16px;padding:10px 12px;box-shadow:3px 3px 0 var(--ink)}
+.stat b{display:block;font-family:'Bangers',sans-serif;font-size:30px;letter-spacing:1px;line-height:1}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.acct{display:inline-flex;align-items:center;gap:8px;background:#fff;border:3px solid var(--ink);border-radius:999px;padding:3px 12px 3px 3px;box-shadow:3px 3px 0 var(--ink);font:800 13px 'Archivo',sans-serif;color:var(--ink);cursor:pointer;min-height:44px;max-width:62vw}
+.acct img,.acct .ph{width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);object-fit:cover;flex:0 0 32px;background:var(--or)}
+.acct span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct.login{padding:3px 14px 3px 6px}
+.sheet{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;z-index:50;padding:0 12px max(16px,env(safe-area-inset-bottom))}
+.sheet .card{width:100%;max-width:440px;padding:16px}
+.badge{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;border-radius:999px;background:var(--red);color:#fff;font:800 12px 'Archivo',sans-serif;padding:0 6px;border:2px solid var(--ink)}
+#rotate{display:none;position:fixed;inset:0;z-index:100;background:var(--paper);align-items:center;justify-content:center;flex-direction:column;gap:12px;text-align:center;padding:24px}
+@media (orientation:landscape) and (max-height:500px) and (pointer:coarse){#rotate{display:flex}#app{display:none}}
+.opts{gap:10px}
+@media (max-width:359px){.pill{padding:3px 8px;font-size:13px;gap:4px}.pill svg{width:18px}}
+/* telas baixas (iPhone SE, celulares pequenos com barra do navegador) */
+@media (max-height:740px){
+  .screen{gap:8px}
+  .avatar{width:48px;height:48px}
+  .opt{min-height:46px;padding:6px 10px}
+  .opt .let{flex-basis:28px;height:28px;font-size:17px}
+  .pick{padding:7px 12px}
+  .pick .avatar{width:44px!important;height:44px!important}
+  .secs{width:44px;height:44px;flex-basis:44px;font-size:21px}
+  .card{box-shadow:4px 4px 0 var(--ink)}
+}
+@media (max-height:620px){
+  .avrow .avatar{width:min(40px,11vw);height:min(40px,11vw)}
+  .btn{min-height:46px}
+  .opt{min-height:42px}
+}
+@media (max-height:620px){
+  .hide-short{display:none!important}
+  .qcard{padding:12px 14px!important}
+  .qtext{font-size:16px!important}
+  .opts{gap:8px}
+  .opt{min-height:40px;font-size:15px}
+  .avatar{width:42px;height:42px}
+  .howto{padding:10px 14px!important}
+  .howto div:last-child{font-size:13.5px!important;line-height:1.38!important}
+  .pick{padding:5px 12px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="rotate"><div class="title3d" style="font-size:44px">GIRA O CELULAR</div><div style="font-weight:700">A Roda da Rima é jogada em pé.</div></div>
+<script>
+/* =========================================================
+   CONFIGURAÇÃO — cole aqui os dados do seu projeto Supabase
+   (Project Settings > API: "Project URL" e "anon public key")
+   ========================================================= */
+const SUPABASE_URL = 'https://kpfwtqmrwgzalxcjybvb.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_Z8Az1FVLGzjVB6Gdjmx18g_-xGgUdfW';
+
+/* ---------- trava de tela: sem zoom, sem copiar, sem arrastar ---------- */
+(function travar(){
+  const campo=t=>t&&t.closest&&t.closest('input,textarea,select,[contenteditable]');
+  ['contextmenu','copy','cut','dragstart','selectstart'].forEach(ev=>document.addEventListener(ev,e=>{if(!campo(e.target))e.preventDefault()},{capture:true}));
+  ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+  document.addEventListener('touchmove',e=>{if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+  document.addEventListener('wheel',e=>{if(e.ctrlKey)e.preventDefault()},{passive:false});
+  document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&['+','-','=','0','a','c','x','s','p'].includes(e.key.toLowerCase())&&!campo(e.target))e.preventDefault()});
+  try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}
+})();
+
+const CATS = [
+  {id:'campeoes', name:'Campeões', color:'#F5A623', txt:'#1a1a1a', m:{name:'DJ Agulha', skin:'#C68B5E', hoodie:'#F5A623', cap:'#E64B55', hat:'nada', fones:true, shades:true}},
+  {id:'mcs', name:'MCs', color:'#E64B55', txt:'#1a1a1a', m:{name:'MC Verso', skin:'#4E2E1D', hoodie:'#E64B55', cap:'#E64B55', hat:'bone', beard:true}},
+  {id:'confrontos', name:'Confrontos', color:'#18A36A', txt:'#1a1a1a', m:{name:'B-Boy Moinho', skin:'#7A4A2E', hoodie:'#18A36A', cap:'#F5A623', hat:'faixa'}},
+  {id:'bda', name:'BDA', color:'#3C7DD9', txt:'#ffffff', m:{name:'Tag', skin:'#F2C7A0', hoodie:'#3C7DD9', cap:'#E64B55', hat:'bucket'}},
+  {id:'old', name:'Old School', color:'#8E2E43', txt:'#ffffff', m:{name:'Griô', skin:'#4E2E1D', hoodie:'#8E2E43', cap:'#F5A623', hat:'nada', glasses:true, beard:true}},
+  {id:'impossivel', name:'Impossível', color:'#1a1a1a', bg:'#B9A9D9', txt:'#ffffff', m:{name:'Rainha', skin:'#7A4A2E', hoodie:'#B9A9D9', cap:'#F5A623', hat:'coroa', afro:true, earrings:true, lashes:true, lips:'#B23A48'}}
+];
+const CROWN_CATS = ['campeoes','mcs','confrontos','bda','old'];
+
+const Q = [
+// MCs
+['mcs','O nome Emicida vem da mistura de quais palavras?','MC + homicida',['Emílio + cidade','MC + Cidade Tiradentes','Eminem + Sabotage'],'O apelido nasceu nas batalhas: diziam que ele "matava" os rivais no improviso.'],
+['mcs','Antes de usar o nome WinniT, o campeão da 1ª edição do Red Bull FrancaMente era conhecido como:','Toddy',['Choice','Noventa','Guri'],'Ele venceu a primeira edição, em 2018, ainda como Toddy, e depois mudou o nome artístico.'],
+['mcs','Em qual batalha de São Gonçalo (RJ) MC Orochi começou a batalhar?','Batalha do Tanque',['Batalha do Real','Batalha da Aldeia','Batalha da Santa Cruz'],'Orochi começou a batalhar ainda adolescente, no Tanque, tradicional duelo de São Gonçalo.'],
+['mcs','Japa MC, campeão do Duelo Nacional 2025, é de qual estado?','Bahia',['Pernambuco','Minas Gerais','Paraná'],'O baiano levou o título nacional depois de quatro anos tentando.'],
+['mcs','Qual MC é popularmente chamado de "GOAT" (o maior de todos) das batalhas de rima?','Big Mike',['Orochi','Kant','Jotapê'],'Big Mike soma títulos como o Duelo Nacional 2022 e o Red Bull FrancaMente 2024.'],
+['mcs','Qual rapper carioca conta que subiu num palco pela primeira vez por causa da Batalha do Real?','Filipe Ret',['Orochi','Marcelo D2','BK\''],'Ret conheceu a Batalha do Real logo no começo, em 2003.'],
+['mcs','Qual rapper ajudou a criar a Rinha dos MCs, em São Paulo, em 2006?','Criolo',['Emicida','Mano Brown','Rashid'],'A Rinha virou ponto de encontro e revelou muita gente da cena paulistana.'],
+['mcs','Por que Kaemy entrou para a história do Duelo de MCs Nacional em 2023?','Foi a primeira mulher a vencer',['Foi a primeira jurada mulher','Venceu sem perder nenhum round','Foi a MC mais nova a competir'],'A vitória em BH virou referência para as minas nas batalhas.'],
+['mcs','Qual MC diz ser o mais novo a participar do Duelo Nacional, desde os 13 anos?','MC Bl4ck',['Orochi','Japa MC','Kaemy'],'Bl4ck está nas batalhas desde moleque.'],
+['mcs','Qual ícone do rap comandou a final do Red Bull FrancaMente 2023, em São Paulo?','Rashid',['Emicida','Criolo','Mano Brown'],'A final foi na casa de shows Audio e celebrou os 50 anos do hip hop.'],
+// Campeões
+['campeoes','Quem venceu o Duelo de MCs Nacional 2015?','MC Orochi',['Big Mike','Douglas Din','MC Charles'],'O carioca de São Gonçalo venceu diante de cerca de 3 mil pessoas no Viaduto Santa Tereza.'],
+['campeoes','Quem foi o campeão do Duelo de MCs Nacional 2022?','Big Mike',['Kaemy','MC Charles','Japa MC'],'O título nacional é um dos muitos do "GOAT" das batalhas.'],
+['campeoes','Quem venceu o Duelo de MCs Nacional 2019, na Praça da Estação?','MC Charles',['MC Orochi','Big Mike','Douglas Din'],'A final de 2019 lotou a Praça da Estação, em BH.'],
+['campeoes','Quem venceu o Duelo de MCs Nacional 2025?','Japa MC',['Big Mike','Kaemy','MC Orochi'],'O baiano coroou anos de persistência com o título.'],
+['campeoes','Quem venceu o primeiro Duelo de MCs Nacional com esse nome, em 2012?','Douglas Din',['MC Orochi','Emicida','MC Charles'],'O belo-horizontino venceu diante de cerca de 3 mil pessoas no viaduto.'],
+['campeoes','Quem venceu a 1ª edição do Red Bull FrancaMente, em 2018?','Toddy (hoje WinniT)',['Big Mike','Kaemy','Apollo'],'A vitória mudou a carreira do MC, que hoje usa o nome WinniT.'],
+['campeoes','Quem venceu o Red Bull FrancaMente 2024?','Big Mike',['Apollo','Kaemy','Levinsk'],'A 5ª edição teve seletivas em Fortaleza e São Paulo.'],
+['campeoes','Em que ano Emicida foi campeão da Liga dos MCs (o atual Duelo de MCs Nacional)?','2006',['2003','2010','2015'],'Emicida ganhou o torneio em 2006, antes de estourar na música.'],
+['campeoes','Em que ano Kaemy venceu o Duelo de MCs Nacional?','2023',['2019','2021','2025'],'Foi a primeira vez que uma mulher levou o título.'],
+// Confrontos
+['confrontos','Na final da Liga dos MCs de 2006, Emicida enfrentou qual MC?','Gil',['Orochi','Kamau','Rashid'],'A final Emicida x Gil virou um clássico das batalhas.'],
+['confrontos','Na final do Duelo Nacional 2015, Orochi venceu qual MC do Distrito Federal?','Alves',['Douglas Din','Noventa','Arllan'],'Orochi bateu o brasiliense Alves na decisão.'],
+['confrontos','Na final da BDA 8 Anos, o trio Neo, Apollo e Tavin venceu Guri, Barreto e Jotapê por qual placar?','3 a 0',['3 a 2','2 a 1','3 a 1'],'Foi uma final sem nenhum round perdido.'],
+['confrontos','Na final da BDA 10 Anos, o trio de Jotapê, Negrote e Apollo enfrentou o trio de qual MC?','Cesar MC',['Kroy','Neo','Guri'],'O trio de Cesar MC chegou à final vencendo a semifinal por 3 a 0.'],
+['confrontos','Quem venceu a final da 480ª Batalha da Aldeia, a seletiva para o duelo contra Portugal?','BTC',['Devilzinha','Ravena','Prado'],'BTC venceu Devilzinha na final.'],
+['confrontos','BTC venceu a 480ª BDA e ganhou vaga em qual confronto internacional?','Brasil x Portugal',['Brasil x Argentina','Brasil x Espanha','Brasil x México'],'O time brasileiro rima em Porto e Lisboa, em dezembro.'],
+['confrontos','No Duelo de MCs Nacional 2025, quantos MCs disputaram a fase final?','32',['8','16','64'],'As seletivas e cinco repescagens fecham os 32 classificados.'],
+// BDA
+['bda','Em qual cidade nasceu a Batalha da Aldeia (BDA)?','Barueri (SP)',['Osasco (SP)','São Bernardo do Campo (SP)','Belo Horizonte (MG)'],'A BDA nasceu numa praça de Barueri e virou referência nacional.'],
+['bda','Em que ano a Batalha da Aldeia foi criada?','2016',['2003','2007','2012'],'Em 2026 a BDA completou 10 anos.'],
+['bda','Em qual dia da semana acontece a Batalha da Aldeia?','Segunda-feira',['Sexta-feira','Sábado','Domingo'],'É toda segunda, a partir das 19h.'],
+['bda','Quem fundou a Batalha da Aldeia?','Bob 13 e Giovanni Zanardi',['Criolo e DJ Dan Dan','PDR e a Família de Rua','Emicida e Fióti'],'Os dois criaram a roda em Barueri, em 2016.'],
+['bda','Qual trio venceu a BDA 10 Anos, em 2026?','Jotapê, Negrote e Apollo',['Neo, Apollo e Tavin','Kroy, Japa e Bask','Cesar MC, Big Mike e Barreto'],'Jotapê ainda foi eleito o MVP da edição.'],
+['bda','Onde aconteceu a BDA 10 Anos?','Vale do Anhangabaú, em São Paulo',['Viaduto Santa Tereza, em BH','Clube Atlético Juventus, em SP','Praça da Estação, em BH'],'O Anhangabaú lotou para o aniversário de 10 anos.'],
+['bda','Nas edições de aniversário da BDA, os MCs batalham em:','Trios',['Duplas','1 contra 1','Quartetos'],'Na BDA 10 Anos, 16 trios entraram na disputa.'],
+['bda','Qual MC é o maior campeão da história da Batalha da Aldeia, com 44 títulos (até dez/2025)?','Kant',['Big Mike','Jotapê','Apollo'],'Big Mike vem logo atrás, com 32 títulos.'],
+['bda','Na BDA, o prêmio "fatality" é dado para:','A melhor rima da noite',['O MC que perdeu mais rápido','O melhor DJ','A maior torcida'],'Na BDA 8 Anos, Apollo levou o MVP e o fatality.'],
+['bda','Qual trio venceu a BDA 8 Anos, em 2024?','Neo, Apollo e Tavin',['Jotapê, Guri e Barreto','Jotapê, Negrote e Apollo','Kant, Neo e Prado'],'A festa foi no Clube Atlético Juventus, em São Paulo.'],
+['bda','Quais MCs são os maiores campeões das edições de aniversário da BDA, com 3 títulos cada?','Jotapê, Neo e Apollo',['Big Mike, Kant e Guri','Cesar MC, Dudu e Noventa','Tavin, Prado e Kroy'],'Jotapê e Apollo chegaram ao 3º título na BDA 10 Anos, igualando Neo.'],
+// Old School
+['old','Qual é considerada a primeira batalha de rimas do Brasil, criada em 2003?','Batalha do Real',['Duelo de MCs','Batalha da Aldeia','Rinha dos MCs'],'Foi pioneira por criar regras e ter constância.'],
+['old','Em qual cidade surgiu a Batalha do Real?','Rio de Janeiro',['São Paulo','Belo Horizonte','Salvador'],'Nasceu no centro do Rio, na Lapa.'],
+['old','Qual batalha é considerada a pioneira de São Paulo?','Batalha da Santa Cruz',['Batalha da Aldeia','Batalha da Matrix','Rinha dos MCs'],'O nome vem da estação Santa Cruz do metrô.'],
+['old','Onde o Duelo de MCs aconteceu nos primeiros meses, antes de ir para o viaduto?','Praça da Estação',['Praça Sete','Mineirão','Praça da Liberdade'],'Começou na calçada da praça, em 2007.'],
+['old','Por que o Duelo de MCs foi parar debaixo do Viaduto Santa Tereza?','Para fugir da chuva',['A prefeitura mandou','Por causa de um show','A praça fechou para obra'],'Choveu, foram se abrigar debaixo do viaduto e o lugar virou a casa do Duelo.'],
+['old','Antes de se chamar Duelo de MCs Nacional, o torneio nacional era conhecido como:','Liga dos MCs',['Rinha dos MCs','Copa do Rap','Batalha Nacional'],'A Liga dos MCs nasceu ligada à Batalha do Real.'],
+['old','Qual coletivo produz o Duelo de MCs, em BH?','Família de Rua',['Racionais MC\'s','Zulu Nation','Posse Mente Zulu'],'PDR, da Família de Rua, é um dos nomes à frente do Duelo.'],
+['old','Qual estação de metrô de SP é lembrada como berço do hip hop paulistano nos anos 80?','São Bento',['Sé','Luz','Paulista'],'Dali e da Rua 24 de Maio saíram nomes como Thaíde, DJ Hum e Racionais.'],
+['old','O filme 8 Mile, sobre batalhas de rima em Detroit, é estrelado por qual rapper?','Eminem',['50 Cent','Snoop Dogg','Dr. Dre'],'O filme é inspirado na trajetória do próprio Eminem.'],
+['old','O Red Bull FrancaMente é a versão brasileira de qual competição?','Red Bull Batalla',['Red Bull BC One','FMS','Duelo de MCs'],'A Red Bull Batalla é a versão em espanhol.'],
+// Impossível
+['impossivel','Em que data aconteceu o primeiro Duelo de MCs, em BH?','24 de agosto de 2007',['11 de agosto de 2007','24 de agosto de 2003','7 de setembro de 2008'],'Foi na Praça da Estação, com umas 20 pessoas.'],
+['impossivel','Quantas pessoas, mais ou menos, viram o primeiro Duelo de MCs?','Cerca de 20',['Cerca de 200','Cerca de mil','Cerca de 3 mil'],'Hoje as finais nacionais reúnem milhares.'],
+['impossivel','Em qual endereço do Rio a Batalha do Real surgiu, em 2003?','Riachuelo 73, na Lapa',['Arcos da Lapa','Circo Voador','Praça XV'],'Anos depois, a final de 2016 lotou o Circo Voador.'],
+['impossivel','Qual trio venceu a primeira edição de aniversário da BDA (BDA 1 Ano, 2017)?','Cesar MC, Dudu e Araps',['Cesar MC, Dudu e Noventa','Noventa, Kant e Salvador','Guerra, Refel e Nauí'],'Cesar MC e Dudu venceram de novo no ano seguinte, com Noventa.'],
+['impossivel','Quanto o campeão do Duelo de MCs Nacional 2019 levou de prêmio em dinheiro?','R$ 15 mil',['R$ 5 mil','R$ 50 mil','R$ 100 mil'],'Além do dinheiro, o campeão ganhou apoio para produções musicais e audiovisuais.'],
+['impossivel','No caminho até a final de 2015, Orochi eliminou quais MCs?','Arllan (PA) e Noventa (ES)',['Alves (DF) e Douglas Din (MG)','Big Mike e Kant','Gil e Kamau'],'Depois disso ele venceu Alves na final.'],
+['impossivel','Japa MC foi o primeiro MC a vencer quantos estaduais seguidos?','5',['3','4','7'],'São cinco estaduais consecutivos antes do título nacional de 2025.'],
+['impossivel','Quantos títulos Big Mike tinha na Batalha da Aldeia até dezembro de 2025?','32',['18','44','50'],'Só Kant tem mais, com 44.'],
+['impossivel','Qual trio perdeu a final da BDA 9 Anos para Kroy, Japa e Bask?','Big Mike, Guri e Devilzinha',['Jotapê, Guri e Barreto','Krawk, Kant e Bask','Cesar MC, Big Mike e Barreto'],'Kroy foi o MVP daquela edição.'],
+['impossivel','Quantos trios entraram na disputa da BDA 10 Anos?','16',['8','12','32'],'Só um saiu com o troféu: Jotapê, Negrote e Apollo.'],
+['impossivel','Em qual praça de Barueri a Batalha da Aldeia nasceu?','Praça dos Estudantes',['Praça da Matriz','Praça da Bíblia','Praça Sete'],'De roda de praça, virou campeonato com mais de 480 edições.']
+];
+
+function esc(t){return String(t??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+const catById = id => CATS.find(c=>c.id===id);
+const norm = s => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+const isUuid = s => /^[0-9a-f-]{36}$/i.test(String(s||''));
+
+function mascot(m){
+  const k='#1a1a1a';
+  const hat = {
+    bone:`<path d="M49 21 Q49 9.5 60 9.5 Q71 9.5 71 21 Z" fill="#fff"/><path d="M49 21 Q49.3 14.5 52.5 12 L55 21 Z" fill="${m.cap}" stroke-width="1.4"/><path d="M71 21 Q70.7 14.5 67.5 12 L65 21 Z" fill="${m.cap}" stroke-width="1.4"/><path d="M49 21 Q60 18.5 71 21 Q78 21 81.5 24 Q72 25.6 60 23.6 Q52 23 49 21 Z" fill="${m.cap}"/>`,
+    bucket:`<path d="M51.5 19 Q52 8.5 60 8.5 Q68 8.5 68.5 19 Z" fill="${m.cap}"/><path d="M45 22.5 Q48 18.3 51.5 19 H68.5 Q72 18.3 75 22.5 Q60 25.5 45 22.5 Z" fill="${m.cap}"/>`,
+    faixa:`<rect x="49" y="14.8" width="22" height="4.4" rx="1.5" fill="${m.cap}"/><path d="M70.5 16 L77.5 20.5 L75.5 12.5 Z" fill="${m.cap}" stroke-width="1.4"/>`,
+    coroa:`<path d="M50.5 16 L51.5 6.5 L55.8 11 L60 4.8 L64.2 11 L68.5 6.5 L69.5 16 Z" fill="#F5A623"/><circle cx="60" cy="12" r="1.4" fill="#E64B55" stroke-width="1"/>`,
+    black:'', nada:''
+  }[m.hat]||'';
+  return `<svg viewBox="33 4 54 72" width="100%" height="100%" aria-hidden="true"><rect x="33" y="4" width="54" height="72" fill="#fff" stroke="none"/><g stroke="${k}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+  ${(m.hat==='black'||m.afro)?`<path d="M48 28 C39 25 40 7 51 6 C55 0 65 0 69 6 C80 7 81 25 72 28 Z" fill="${k}"/>`:''}
+  <path d="M42 51 Q42 43 50 43 H70 Q78 43 78 51 L76.5 92 H43.5 Z" fill="${m.hoodie}"/>
+  <path d="M67 43.5 H70 Q78 43 78 51 L76.5 92 H69 Q73 70 67 43.5 Z" fill="#000" opacity=".13" stroke="none"/>
+  <path d="M56 36 H64 V44 H56 Z" fill="${m.skin}"/>
+  <path d="M53.5 43.5 Q60 49 66.5 43.5" fill="none" stroke-width="1.6"/>
+  <path d="M54.5 45 Q60 57 65.5 45" fill="none" stroke="#F5A623" stroke-width="1.6"/>
+  <ellipse cx="49.5" cy="26" rx="2.4" ry="3.4" fill="${m.skin}"/><ellipse cx="70.5" cy="26" rx="2.4" ry="3.4" fill="${m.skin}"/>
+  <ellipse cx="60" cy="25" rx="10.5" ry="12.5" fill="${m.skin}"/>
+  <path d="M62 14 Q69 16 70 24 Q68 34 62 37 Q67 27 62 14 Z" fill="#000" opacity=".12" stroke="none"/>
+  ${m.beard?`<path d="M50 27 Q50.5 39 60 39.5 Q69.5 39 70 27 Q66 35 60 35.2 Q54 35 50 27 Z" fill="${k}" stroke-width="1"/>`:''}
+  <g stroke="none" fill="${k}"><ellipse cx="56" cy="25" rx="1.2" ry="1.6"/><ellipse cx="64" cy="25" rx="1.2" ry="1.6"/></g>
+  ${m.lashes?`<path d="M54 23.6 L53 22.6 M66 23.6 L67 22.6" fill="none" stroke-width="1"/>`:''}
+  <path d="M53.3 21.6 L58 21 M62 21 L66.7 21.6" fill="none" stroke-width="1.5"/>
+  <path d="M60 26 Q59 29.3 61 29.8" fill="none" stroke-width="1.1"/>
+  ${m.lips?`<path d="M57 32.4 Q60 31.6 63 32.4 Q60 35 57 32.4 Z" fill="${m.lips}" stroke-width="1"/>`:`<path d="M57.2 32.6 Q60 34.2 62.8 32.6" fill="none" stroke-width="1.3"/>`}
+  ${m.earrings?`<circle cx="49.3" cy="31.5" r="2.2" fill="none" stroke="#F5A623" stroke-width="1.3"/><circle cx="70.7" cy="31.5" r="2.2" fill="none" stroke="#F5A623" stroke-width="1.3"/>`:''}
+  <path d="M49.6 24 Q49 12 60 12 Q71 12 70.4 24 Q68 16.5 60 17 Q52 16.5 49.6 24 Z" fill="${k}" stroke-width="1"/>
+  ${m.afro?`<path d="M49.5 22 Q50 12 60 11.5 Q70 12 70.5 22 Q66 15 60 15.5 Q54 15 49.5 22 Z" fill="${k}" stroke-width="1"/>`:''}
+  ${m.shades?`<path d="M51.5 22.5 H59 V25.5 Q59 28.5 55.5 28.5 Q51.5 28.5 51.5 25 Z M61 22.5 H68.5 V25 Q68.5 28.5 64.5 28.5 Q61 28.5 61 25.5 Z" fill="${k}" stroke-width="1"/><path d="M59 23.5 H61" fill="none" stroke-width="1.2"/><path d="M53 23.8 L55 23.8" stroke="#fff" stroke-width="0.9" fill="none"/>`:''}
+  ${m.glasses?`<g fill="none" stroke-width="1.2"><circle cx="56" cy="25" r="3.3"/><circle cx="64" cy="25" r="3.3"/><path d="M59.3 24.6 H60.7"/></g>`:''}
+  ${hat}
+  ${m.fones?`<path d="M48 27 Q47.5 9 60 9 Q72.5 9 72 27" fill="none" stroke-width="3.2"/><rect x="45" y="21" width="6.5" height="11" rx="2.6" fill="${m.cap}"/><rect x="68.5" y="21" width="6.5" height="11" rx="2.6" fill="${m.cap}"/>`:''}
+  </g></svg>`;
+}
+
+
+
+const CROWN_SVG = (fill)=>`<svg width="20" height="16" viewBox="-1 -1 26 22" aria-hidden="true"><path d="M2 17 L4 4 L9 10 L12 2 L15 10 L20 4 L22 17 Z" fill="${fill}" stroke="#1a1a1a" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
+const BOLT = `<svg width="30" height="42" viewBox="0 0 36 50" aria-hidden="true"><path d="M22 2 L6 26 H18 L12 48 L32 20 H20 L28 2 Z" fill="#F5A623" stroke="#1a1a1a" stroke-width="2.5" stroke-linejoin="round"/></svg>`;
+const HEART = (on)=>`<svg width="22" height="20" viewBox="-2 -2 28 26" aria-hidden="true"><path d="M12 21 C4 15 1 11 1 6.8 A5.6 5.6 0 0 1 12 4.2 A5.6 5.6 0 0 1 23 6.8 C23 11 20 15 12 21 Z" fill="${on?'#E64B55':'#fff'}" stroke="#1a1a1a" stroke-width="2.2" stroke-linejoin="round"/></svg>`;
+const GOOGLE = `<svg width="22" height="22" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.6 13.2l7.9 6.1C12.4 13.7 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.7 6c4.5-4.2 6.9-10.3 6.9-17.7z"/><path fill="#FBBC05" d="M10.5 28.7A14.6 14.6 0 0 1 9.5 24c0-1.6.3-3.2.8-4.7l-7.9-6.1A24 24 0 0 0 0 24c0 3.9.9 7.5 2.6 10.8l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.7-6c-2.2 1.5-5 2.3-8.2 2.3-6.3 0-11.6-4.2-13.5-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
+
+/* ---------- Supabase ---------- */
+const SB_OK = /^https:\/\/[a-z0-9-]+\.supabase\.co\/?$/i.test(SUPABASE_URL) && SUPABASE_ANON_KEY.length>30 && !!window.supabase;
+const sb = SB_OK ? window.supabase.createClient(SUPABASE_URL.replace(/\/$/,''), SUPABASE_ANON_KEY) : null;
+const AUTH = {uid:null, user:null, perfil:null};
+const isAdmin = () => !!(AUTH.perfil && AUTH.perfil.papel==='admin');
+let CFG = {vidas:3, tempo:20, tempo_impossivel:25, medidor:3, impossivel_enche:true};
+const DATA = {perguntas:null};
+
+function fromRow(r){return {id:r.id,cat:r.categoria,q:r.pergunta,c:r.certa,w:[r.errada1,r.errada2,r.errada3],ex:r.explicacao||'',key:r.id}}
+function allQuestions(){
+  if(DATA.perguntas&&DATA.perguntas.length) return DATA.perguntas;
+  return Q.map((q,i)=>({cat:q[0],q:q[1],c:q[2],w:q[3],ex:q[4],id:'b'+i,key:'b'+i}));
+}
+async function carregarPerguntas(){
+  if(!sb) return;
+  const {data,error}=await sb.from('perguntas').select('id,categoria,pergunta,certa,errada1,errada2,errada3,explicacao').eq('status','aprovada').eq('ativa',true).limit(5000);
+  if(!error&&data) DATA.perguntas=data.filter(r=>catById(r.categoria)).map(fromRow);
+}
+async function carregarConfig(){
+  if(!sb) return;
+  const {data}=await sb.from('config').select('*').eq('id',1).maybeSingle();
+  if(data) CFG={...CFG,...data};
+}
+async function login(){
+  if(!sb) return;
+  await sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:location.origin+location.pathname}});
+}
+async function sair(){ if(sb) await sb.auth.signOut(); }
+async function setSession(s){
+  const uid=(s&&s.user&&s.user.id)||null;
+  if(uid===AUTH.uid && (AUTH.perfil||!uid)) return;
+  AUTH.uid=uid;AUTH.user=s?s.user:null;AUTH.perfil=null;
+  if(uid){
+    const {data}=await sb.from('perfis').select('id,nome,avatar,papel').eq('id',uid).maybeSingle();
+    AUTH.perfil=data||{id:uid,nome:(s.user.user_metadata||{}).full_name||'',avatar:(s.user.user_metadata||{}).avatar_url||'',papel:'jogador'};
+    carregarVistos();
+    if(isAdmin()) contarPendentes();
+  }
+  if(VIEW==='home') home(); if(VIEW==='criar') criar();
+}
+
+/* ---------- perguntas já vistas ---------- */
+let SEEN={};
+try{SEEN=JSON.parse(localStorage.getItem('rr_seen')||'{}')||{}}catch(e){SEEN={}}
+function saveSeenLocal(){try{localStorage.setItem('rr_seen',JSON.stringify(SEEN))}catch(e){}}
+function markSeen(key){SEEN[key]=Date.now();saveSeenLocal()}
+async function carregarVistos(){
+  if(!sb||!AUTH.uid) return;
+  const {data}=await sb.from('vistos').select('pergunta_id,visto_em').eq('usuario_id',AUTH.uid).order('visto_em',{ascending:false}).limit(5000);
+  (data||[]).forEach(r=>{const t=Date.parse(r.visto_em)||0;if(!SEEN[r.pergunta_id]||SEEN[r.pergunta_id]<t)SEEN[r.pergunta_id]=t});
+  saveSeenLocal();
+}
+function logVisto(q,resultado){ if(sb&&AUTH.uid&&isUuid(q.id)) sb.from('vistos').insert({usuario_id:AUTH.uid,pergunta_id:q.id,resultado}).then(()=>{}); }
+function logPartida(won,n){ if(sb&&AUTH.uid) sb.from('partidas').insert({usuario_id:AUTH.uid,pontos:S.score,acertos:S.right,respondidas:S.count,personagens:n,venceu:!!won}).then(()=>{}); }
+
+/* ---------- estado do jogo ---------- */
+let S, VIEW='home', PEND=0;
+function best(){try{return +localStorage.getItem('rr_best')||0}catch(e){return 0}}
+function saveBest(v){try{localStorage.setItem('rr_best',v)}catch(e){}}
+function newGame(){
+  S={score:0,lives:CFG.vidas,streak:0,meter:0,crowns:{},used:new Set(),rot:0,timer:null,count:0,right:0};
+  CROWN_CATS.forEach(c=>S.crowns[c]=false);
+}
+const app=document.getElementById('app');
+function render(html,wide){clearInterval(S&&S.timer);app.innerHTML=`<div class="screen fade${wide?' wide':''}">${html}</div>`;app.scrollTop=0}
+
+function hud(){
+  const n=Math.max(CFG.vidas,1);
+  const hearts=n<=5?Array.from({length:n},(_,i)=>HEART(i<S.lives)).join(''):`${HEART(true)} ${S.lives}`;
+  return `<div class="row"><span class="pill" aria-label="${S.lives} vidas">${hearts}</span><span class="pill bang" style="font-size:clamp(16px,5vw,20px);font-weight:400">${S.score} PTS</span><span class="pill bang" style="font-size:clamp(15px,4.6vw,18px);font-weight:400">SEQ ${S.streak}</span></div>`;
+}
+function meterRow(){
+  return `<div class="row" style="gap:10px;justify-content:flex-start"><span class="bang" style="font-size:clamp(15px,4.6vw,18px);white-space:nowrap">MEDIDOR DE COROA</span><div style="display:flex;gap:6px;flex:1">${Array.from({length:CFG.medidor},(_,i)=>`<span style="flex:1;height:16px;border-radius:999px;border:2.5px solid #1a1a1a;background:${i<S.meter?'#F5A623':'#fff'}"></span>`).join('')}</div></div>`;
+}
+function crewRow(){
+  return `<div class="card" style="padding:10px 10px 12px;border-radius:16px;box-shadow:4px 4px 0 #1a1a1a">
+  <div class="row" style="margin-bottom:8px;padding:0 2px"><span class="bang" style="font-size:19px">SUA CREW</span><span class="small">${CROWN_CATS.filter(c=>S.crowns[c]).length} de 5</span></div>
+  <div class="crew">${CROWN_CATS.map(id=>{const c=catById(id);const on=S.crowns[id];return `<div class="crewcell"><div class="crewav ${on?'on':''}" style="${on?`background:${c.color}`:''}">${mascot(c.m)}</div><span class="crewname" style="color:${on?'#1a1a1a':'#6b6b6b'}">${c.name}</span></div>`}).join('')}</div>
+  <div style="margin-top:10px">${meterRow()}</div></div>`;
+}
+
+/* ---------- conta ---------- */
+function acctChip(){
+  if(!sb) return '<span></span>';
+  if(!AUTH.uid) return `<button class="acct login" id="acct">${GOOGLE}<span>Entrar com Google</span></button>`;
+  const p=AUTH.perfil||{};const first=String(p.nome||'Você').split(' ')[0];
+  const img=p.avatar?`<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer">`:`<span class="ph"></span>`;
+  return `<button class="acct" id="acct">${img}<span>${esc(first)}</span>${isAdmin()&&PEND?`<span class="badge">${PEND}</span>`:''}</button>`;
+}
+function bindAcct(){
+  const b=document.getElementById('acct'); if(!b) return;
+  b.onclick=()=>{ if(!AUTH.uid) return login(); menuConta(); };
+}
+function menuConta(){
+  const p=AUTH.perfil||{};
+  const el=document.createElement('div');el.className='sheet';
+  el.innerHTML=`<div class="card stack fade"><div class="row" style="justify-content:flex-start;gap:12px">${p.avatar?`<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer" style="width:48px;height:48px;border-radius:50%;border:3px solid #1a1a1a">`:''}<div><div style="font-weight:800">${esc(p.nome||'')}</div><div class="small">${isAdmin()?'Admin':'Jogador'}</div></div></div>
+  ${isAdmin()?`<button class="btn sm" id="m-admin" style="background:#3C7DD9;color:#fff">PAINEL ADMIN ${PEND?`<span class="badge">${PEND}</span>`:''}</button>`:''}
+  <button class="btn sm" id="m-sair" style="background:#fff">SAIR DA CONTA</button>
+  <button class="btn sm" id="m-fechar" style="background:#E8E6E1">FECHAR</button></div>`;
+  document.body.appendChild(el);
+  const close=()=>el.remove();
+  el.onclick=e=>{if(e.target===el)close()};
+  el.querySelector('#m-fechar').onclick=close;
+  el.querySelector('#m-sair').onclick=async()=>{close();await sair()};
+  const a=el.querySelector('#m-admin'); if(a) a.onclick=()=>{close();admin('aprovar')};
+}
+async function contarPendentes(){
+  if(!sb||!isAdmin()) return;
+  const {count}=await sb.from('perguntas').select('id',{count:'exact',head:true}).eq('status','pendente');
+  PEND=count||0; if(VIEW==='home') home();
+}
+
+/* ---------- home ---------- */
+function home(){
+  VIEW='home'; newGame();
+  render(`<div class="row" style="justify-content:flex-end;min-height:44px">${acctChip()}</div>
+  <div style="text-align:center" class="hide-short"><span class="bubble" style="display:inline-block;border-radius:999px;padding:6px 16px">O QUIZ DA BATALHA DE RIMA</span></div>
+  <h1 class="title3d t-xl" style="margin-top:4px">RODA DA<br>RIMA</h1>
+  <div class="avrow">${CATS.map(c=>`<div class="avatar" style="background:${c.bg||c.color}">${mascot(c.m)}</div>`).join('')}</div>
+  <div class="card howto" style="padding:12px 16px"><div class="bang" style="font-size:22px">COMO JOGAR</div>
+  <div style="font-size:clamp(14px,4.2vw,16px);line-height:1.45;font-weight:500">Gira, responde, enche o medidor. Escolhe quem vai pro teu bonde e prova que conhece. Fechou os 5? Rei da roda. ${CFG.vidas} vida${CFG.vidas===1?'':'s'}, sem vacilo.</div></div>
+  <div style="margin-top:auto;padding-top:6px" class="stack"><button class="btn" id="go"><svg width="20" height="22" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2 L20 12 L3 22 Z" fill="#1a1a1a"/></svg>JOGAR</button>
+  <button class="btn sm" id="criar" style="background:#18A36A">+ ADICIONAR PERGUNTA</button>
+  <div class="small" style="text-align:center">Recorde: ${best()} pts</div></div>`);
+  bindAcct();
+  document.getElementById('go').onclick=wheel;
+  document.getElementById('criar').onclick=criar;
+}
+
+/* ---------- roleta ---------- */
+const ANG={campeoes:30,mcs:90,confrontos:150,bda:210,old:270,impossivel:330};
+function wheelSVG(){
+  const pts=[[150,10],[271.24,80],[271.24,220],[150,290],[28.76,220],[28.76,80]];
+  const lab=[[200,63,30],[250,150,90],[200,237,-30],[100,237,30],[52,150,-90],[100,63,-30]];
+  let s=`<svg id="wheel" viewBox="0 0 300 300" role="img" aria-label="Roleta de categorias"><circle cx="150" cy="150" r="146" fill="#fff" stroke="#1a1a1a" stroke-width="4"/>`;
+  CATS.forEach((c,i)=>{const a=pts[i],b=pts[(i+1)%6];s+=`<path d="M150 150 L${a[0]} ${a[1]} A140 140 0 0 1 ${b[0]} ${b[1]} Z" fill="${c.color}" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/>`;});
+  CATS.forEach((c,i)=>{const l=lab[i];s+=`<text x="${l[0]}" y="${l[1]}" transform="rotate(${l[2]} ${l[0]} ${l[1]})" font-family="Bangers" font-size="19" letter-spacing="1" text-anchor="middle" dominant-baseline="middle" fill="${c.txt}">${c.name.toUpperCase()}</text>`;});
+  return s+`</svg>`;
+}
+function pickQuestion(catId){
+  const pool=allQuestions().filter(q=>q.cat===catId&&!S.used.has(q.key));
+  if(!pool.length) return null;
+  const nunca=pool.filter(q=>!SEEN[q.key]);
+  if(nunca.length) return nunca[Math.floor(Math.random()*nunca.length)];
+  const velhas=pool.sort((a,b)=>SEEN[a.key]-SEEN[b.key]).slice(0,Math.min(3,pool.length));
+  return velhas[Math.floor(Math.random()*velhas.length)];
+}
+function wheel(){
+  VIEW='wheel';
+  render(`${hud()}
+  <h2 class="title3d t-l" style="margin-top:4px">GIRA A RODA!</h2>
+  <div class="marker" style="text-align:center;font-size:clamp(14px,4.4vw,16px)">e reza pra não cair no Impossível</div>
+  <div class="wheelwrap">${wheelSVG()}
+  <svg class="pointer" viewBox="0 0 40 46" aria-hidden="true"><path d="M4 3 H36 L20 43 Z" fill="#fff" stroke="#1a1a1a" stroke-width="4" stroke-linejoin="round"/></svg>
+  <button class="hub" id="spin">GIRA!</button></div>
+  <div style="margin-top:auto">${crewRow()}</div>`);
+  const w=document.getElementById('wheel');
+  w.style.transition='none';w.style.transform=`rotate(${S.rot}deg)`;
+  document.getElementById('spin').onclick=e=>{
+    e.currentTarget.disabled=true;
+    const all=allQuestions();
+    const avail=CATS.filter(c=>all.some(q=>q.cat===c.id&&!S.used.has(q.key)));
+    if(!avail.length) return end(false,'Acabaram as perguntas do banco!');
+    const fresh=avail.filter(c=>all.some(q=>q.cat===c.id&&!S.used.has(q.key)&&!SEEN[q.key]));
+    const bag=avail.concat(fresh,fresh);
+    const cat=bag[Math.floor(Math.random()*bag.length)];
+    S.rot=Math.ceil(S.rot/360)*360+360*5-ANG[cat.id]+(Math.random()*36-18);
+    w.getBoundingClientRect();
+    w.style.transition='transform 3.4s cubic-bezier(.12,.75,.18,1)';
+    w.style.transform=`rotate(${S.rot}deg)`;
+    setTimeout(()=>ask(cat,false),3550);
+  };
+}
+
+/* ---------- escolher personagem ---------- */
+function choose(){
+  VIEW='choose';
+  const miss=CROWN_CATS.filter(c=>!S.crowns[c]).map(catById);
+  render(`${hud()}
+  <h2 class="title3d t-l" style="margin-top:8px">MEDIDOR CHEIO!</h2>
+  <div class="marker hide-short" style="text-align:center;font-size:clamp(14px,4.6vw,17px)">Escolhe quem vai pro teu bonde e responde uma da categoria dele.</div>
+  <div class="stack" style="margin-top:4px">${miss.map(c=>{const has=allQuestions().some(q=>q.cat===c.id&&!S.used.has(q.key));return `<button class="pick" data-c="${c.id}" ${has?'':'disabled'} style="background:${c.color};color:${c.txt}"><span class="avatar" style="width:54px;height:54px">${mascot(c.m)}</span><span style="text-align:left"><span class="bang" style="font-size:clamp(20px,6.5vw,26px);display:block;line-height:1">${esc(c.m.name).toUpperCase()}</span><span style="font-weight:800;font-size:14px">${has?esc(c.name):'Sem perguntas sobrando'}</span></span></button>`}).join('')}</div>`);
+  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>ask(catById(b.dataset.c),true));
+}
+
+/* ---------- pergunta ---------- */
+function ask(cat,crown){
+  VIEW='ask';
+  const q=pickQuestion(cat.id); if(!q) return crown?choose():wheel();
+  S.used.add(q.key);S.count++;markSeen(q.key);
+  const opts=shuffle([q.c,...q.w]);
+  const T=cat.id==='impossivel'?CFG.tempo_impossivel:CFG.tempo;let t=T;
+  render(`${hud()}
+  ${crown?`<div class="pill bang" style="align-self:center;background:#F5A623;font-size:clamp(16px,5vw,20px);font-weight:400">${CROWN_SVG('#fff')} VALENDO ${esc(cat.m.name).toUpperCase()}</div>`:''}
+  <div class="row" style="justify-content:flex-start;gap:12px"><div class="avatar" style="width:54px;height:54px;background:${cat.bg||cat.color}">${mascot(cat.m)}</div>
+  <div style="min-width:0"><div class="bang" style="font-size:clamp(22px,7vw,28px);color:${cat.color};-webkit-text-stroke:1px #1a1a1a;line-height:1">${cat.name.toUpperCase()}</div><div class="small">com ${esc(cat.m.name)} · pergunta ${S.count}</div></div>
+  <div class="secs bang"><span id="sec">${t}</span></div></div>
+  <div class="timer"><i id="bar" style="width:100%"></i></div>
+  <div style="position:relative;margin-top:8px"><div class="card qcard" style="padding:16px 16px 18px;border-radius:24px"><div class="marker hide-short" style="color:${cat.id==='impossivel'?'#8E2E43':cat.color};font-size:14px;margin-bottom:6px;-webkit-text-stroke:.3px #1a1a1a">${esc(cat.m.name)} pergunta:</div><div class="qtext" style="font-size:clamp(17px,5.3vw,21px);font-weight:800;line-height:1.28">${esc(q.q)}</div></div><div class="hide-short" style="position:absolute;right:-4px;top:-22px">${BOLT}</div></div>
+  <div class="stack opts" style="margin-top:4px" id="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}"><span class="let" style="background:${['#F5A623','#E64B55','#18A36A','#3C7DD9'][i]};${i===3?'color:#fff':''}">${'ABCD'[i]}</span><span>${esc(o)}</span></button>`).join('')}</div>`);
+  const bar=document.getElementById('bar'),sec=document.getElementById('sec');
+  requestAnimationFrame(()=>{bar.style.width=((t-1)/T*100)+'%'});
+  S.timer=setInterval(()=>{t--;sec.textContent=t;bar.style.width=(Math.max(t-1,0)/T*100)+'%';if(t<=0){clearInterval(S.timer);answer(null,q,cat,crown,opts)}},1000);
+  document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{clearInterval(S.timer);answer(opts[+b.dataset.i],q,cat,crown,opts)});
+}
+
+function answer(v,q,cat,crown,opts){
+  if(S.answered===q.key) return; S.answered=q.key;
+  const ok=v===q.c;
+  logVisto(q,ok?'acertou':(v===null?'tempo':'errou'));
+  document.querySelectorAll('.opt').forEach(b=>{const val=opts[+b.dataset.i];b.disabled=true;if(val===q.c)b.classList.add('right');else if(val===v)b.classList.add('wrong');else b.classList.add('dim')});
+  let gained=null,msg='',full=false;
+  if(ok){
+    S.streak++;S.right++;
+    const pts=(crown?200:cat.id==='impossivel'?250:100)+Math.max(0,S.streak-1)*20;S.score+=pts;msg=`+${pts} PTS`;
+    if(crown){S.crowns[cat.id]=true;gained=cat;S.meter=0}
+    else{S.meter=(cat.id==='impossivel'&&CFG.impossivel_enche)?CFG.medidor:Math.min(CFG.medidor,S.meter+1);full=S.meter>=CFG.medidor&&CROWN_CATS.some(c=>!S.crowns[c])}
+  } else {
+    S.streak=0;S.lives--; if(crown) S.meter=0;
+    const o=document.getElementById('opts'); if(o) o.classList.add('shake');
+  }
+  const head = ok ? (gained?'É DA CREW!':cat.id==='impossivel'?'LENDÁRIO!':['PUNCHLINE!','FATALITY!','RIMOU BONITO!'][Math.floor(Math.random()*3)]) : (v===null?'O TEMPO ACABOU!':['ATRAVESSOU O BEAT!','SEM RIMA, PARCEIRO!','FALTOU FLOW!'][Math.floor(Math.random()*3)]);
+  setTimeout(()=>feedback(ok,head,msg,q,cat,gained,full,crown),650);
+}
+
+function feedback(ok,head,msg,q,cat,gained,full,crown){
+  VIEW='feedback';
+  const won=CROWN_CATS.every(c=>S.crowns[c]);
+  const label = won||S.lives<=0 ? 'VER RESULTADO' : full ? 'ESCOLHER PERSONAGEM' : 'GIRAR DE NOVO';
+  render(`${hud()}
+  <h2 class="title3d t-m" style="margin-top:10px;${ok?'':'color:#E64B55'};transform:rotate(-3deg)">${head}</h2>
+  <div style="display:flex;justify-content:center;gap:8px;flex-wrap:wrap">${ok?`<span class="pill bang" style="background:#18A36A;font-size:20px;font-weight:400">${msg}</span>`:`<span class="pill bang" style="background:#E64B55;font-size:20px;font-weight:400">-1 VIDA</span>`}${gained?`<span class="pill bang" style="background:${gained.color};color:${gained.txt};font-size:20px;font-weight:400">${CROWN_SVG('#F5A623')} ${esc(gained.m.name).toUpperCase()}</span>`:''}${crown&&!ok?`<span class="pill bang" style="font-size:18px;font-weight:400">MEDIDOR ZEROU</span>`:''}</div>
+  <div class="card" style="padding:14px 16px"><div class="row" style="justify-content:flex-start;gap:10px"><div class="avatar" style="width:46px;height:46px;background:${cat.bg||cat.color}">${mascot(cat.m)}</div><div style="min-width:0"><div class="small">Resposta certa</div><div class="bang" style="font-size:22px;line-height:1.05">${esc(q.c).toUpperCase()}</div></div></div>
+  ${q.ex?`<div style="font-size:15px;line-height:1.45;margin-top:8px;font-weight:500">${esc(q.ex)}</div>`:''}<div class="marker" style="font-size:13px;margin-top:6px">— ${esc(cat.m.name)}</div></div>
+  <div>${crewRow()}</div>
+  <div style="margin-top:auto"><button class="btn" id="next">${label}</button></div>`);
+  document.getElementById('next').onclick=()=>{ if(won||S.lives<=0) return end(won); if(full) return choose(); wheel(); };
+}
+
+function end(won,note){
+  VIEW='end';
+  const rec=S.score>best();if(rec)saveBest(S.score);
+  const n=CROWN_CATS.filter(c=>S.crowns[c]).length;
+  logPartida(won,n);
+  render(`<h2 class="title3d ${won?'t-xl':'t-l'}" style="margin-top:18px;${won?'':'color:#E64B55'}">${won?'REI DA<br>RODA!':'FIM DA<br>BATALHA'}</h2>
+  <div class="marker hide-short" style="font-size:clamp(15px,4.8vw,18px);text-align:center">${note?esc(note):won?'A crew tá completa. A roda é tua.':'Acabaram as vidas. Volta pra roda!'}</div>
+  <div class="card" style="padding:16px">
+  <div class="row"><span class="bang" style="font-size:22px">PONTOS</span><span class="bang" style="font-size:30px">${S.score}</span></div>
+  <div class="row"><span style="font-weight:700">Acertos</span><span style="font-weight:800">${S.right} de ${S.count}</span></div>
+  <div class="row"><span style="font-weight:700">Personagens</span><span style="font-weight:800">${n} de 5</span></div>
+  ${rec?'<div class="bang" style="font-size:20px;color:#18A36A;margin-top:6px">NOVO RECORDE!</div>':`<div class="small" style="margin-top:6px">Recorde: ${best()} pts</div>`}</div>
+  <div>${crewRow()}</div>
+  ${sb&&!AUTH.uid?`<button class="acct login" id="acct" style="align-self:center">${GOOGLE}<span>Entra com Google pra salvar teu progresso</span></button>`:''}
+  <div style="margin-top:auto" class="stack"><button class="btn" id="again">JOGAR DE NOVO</button><button class="btn sm" id="home" style="background:#fff">INÍCIO</button></div>`);
+  bindAcct();
+  document.getElementById('again').onclick=()=>{newGame();wheel()};
+  document.getElementById('home').onclick=home;
+}
+
+/* ---------- formulário de pergunta (jogador e admin) ---------- */
+function formHTML(p,admin){
+  p=p||{};
+  return `<form id="f" class="card stack" style="padding:16px" novalidate>
+  <label class="fl">Categoria<select id="fcat">${CATS.map(c=>`<option value="${c.id}" ${p.cat===c.id?'selected':''}>${esc(c.name)} — ${esc(c.m.name)}</option>`).join('')}</select></label>
+  <label class="fl">Pergunta<textarea id="fq" maxlength="180" rows="3" placeholder="Ex.: Em que ano começou o Duelo de MCs?">${esc(p.q||'')}</textarea></label>
+  <label class="fl"><span><span class="dot" style="background:#18A36A"></span>Resposta certa</span><input id="fc" maxlength="70" value="${esc(p.c||'')}" autocomplete="off"></label>
+  <label class="fl"><span><span class="dot" style="background:#E64B55"></span>Resposta errada 1</span><input id="fw1" maxlength="70" value="${esc((p.w||[])[0]||'')}" autocomplete="off"></label>
+  <label class="fl"><span><span class="dot" style="background:#E64B55"></span>Resposta errada 2</span><input id="fw2" maxlength="70" value="${esc((p.w||[])[1]||'')}" autocomplete="off"></label>
+  <label class="fl"><span><span class="dot" style="background:#E64B55"></span>Resposta errada 3</span><input id="fw3" maxlength="70" value="${esc((p.w||[])[2]||'')}" autocomplete="off"></label>
+  <label class="fl">Explicação ou fonte <span class="small" style="font-weight:500">(opcional)</span><textarea id="fex" maxlength="220" rows="2">${esc(p.ex||'')}</textarea></label>
+  ${admin?`<label class="fl">Status<select id="fst">${['aprovada','pendente','recusada'].map(s=>`<option ${(p.status||'aprovada')===s?'selected':''}>${s}</option>`).join('')}</select></label>
+  <label class="check"><input type="checkbox" id="fat" ${p.ativa===false?'':'checked'}> Ativa no jogo</label>`:''}
+  <div id="ferr" class="small" style="color:#B3261E" role="alert"></div>
+  <button class="btn" id="salvar" type="submit" style="background:#18A36A">SALVAR</button>
+  <div id="cstatus" class="small" style="text-align:center"></div></form>`;
+}
+function readForm(admin){
+  const val=id=>document.getElementById(id).value.trim();
+  const r={categoria:val('fcat'),pergunta:val('fq'),certa:val('fc'),errada1:val('fw1'),errada2:val('fw2'),errada3:val('fw3'),explicacao:val('fex')};
+  if(admin){r.status=val('fst');r.ativa=document.getElementById('fat').checked}
+  if(r.pergunta.length<5||!r.certa||!r.errada1||!r.errada2||!r.errada3) return {erro:'Preencha a pergunta, a resposta certa e as 3 erradas.'};
+  if(new Set([r.certa,r.errada1,r.errada2,r.errada3].map(norm)).size<4) return {erro:'As 4 respostas precisam ser diferentes.'};
+  return {r};
+}
+const STATUS_COR={pendente:'#F5A623',aprovada:'#BDEBD3',recusada:'#F6C3C7'};
+
+/* ---------- adicionar pergunta (jogador) ---------- */
+async function criar(){
+  VIEW='criar';
+  const top=`<div class="row"><button class="iconbtn" id="back" aria-label="Voltar">‹</button><span class="pill bang" style="font-size:18px;font-weight:400">NOVA PERGUNTA</span><span style="width:44px"></span></div>
+  <h2 class="title3d t-l" style="margin-top:4px">CRIE SUA<br>PERGUNTA</h2>`;
+  if(!sb){render(top+`<div class="card" style="padding:16px">O jogo ainda não está ligado no banco de perguntas.</div>`);document.getElementById('back').onclick=home;return}
+  if(!AUTH.uid){
+    render(top+`<div class="card stack" style="padding:16px;text-align:center"><div style="font-weight:600;line-height:1.45">Entra com tua conta Google pra mandar pergunta. Ela passa por aprovação antes de cair no jogo.</div><button class="acct login" id="acct" style="align-self:center">${GOOGLE}<span>Entrar com Google</span></button></div>`);
+    bindAcct();document.getElementById('back').onclick=home;return;
+  }
+  render(top+`<div class="small" style="text-align:center;font-weight:600">${isAdmin()?'Como admin, tua pergunta já entra aprovada.':'Tua pergunta passa por aprovação antes de cair no jogo.'}</div>${formHTML({cat:'mcs'},false)}
+  <div class="bang" style="font-size:22px;margin-top:6px">TUAS PERGUNTAS</div><div class="stack" id="minhas"><div class="small">Carregando…</div></div>`);
+  document.getElementById('back').onclick=home;
+  minhas();
+  document.getElementById('f').onsubmit=async e=>{
+    e.preventDefault();
+    const {r,erro}=readForm(false);const err=document.getElementById('ferr'),st=document.getElementById('cstatus'),btn=document.getElementById('salvar');
+    if(erro){err.textContent=erro;return}
+    if(isAdmin()){r.status='aprovada';r.origem='oficial';r.autor_id=AUTH.uid;r.autor_nome=(AUTH.perfil||{}).nome||null}
+    err.textContent='';btn.disabled=true;st.textContent='Enviando…';
+    const {error}=await sb.from('perguntas').insert(r);
+    btn.disabled=false;
+    if(error){st.textContent='';err.textContent='Não deu pra enviar agora. Tenta de novo.';return}
+    ['fq','fc','fw1','fw2','fw3','fex'].forEach(id=>document.getElementById(id).value='');
+    st.innerHTML=isAdmin()?'<b style="color:#0f6b45">Salva e já no jogo!</b>':'<b style="color:#0f6b45">Recebida!</b> Ela entra no jogo depois de aprovada.';
+    if(isAdmin()) carregarPerguntas();
+    minhas();
+  };
+}
+async function minhas(){
+  const box=document.getElementById('minhas'); if(!box) return;
+  const {data}=await sb.from('perguntas').select('id,categoria,pergunta,status,criada_em').eq('autor_id',AUTH.uid).order('criada_em',{ascending:false}).limit(30);
+  if(!document.getElementById('minhas')) return;
+  box.innerHTML=(data&&data.length)?data.map(r=>{const c=catById(r.categoria);return `<div class="card" style="padding:10px 12px;border-radius:14px;box-shadow:3px 3px 0 #1a1a1a"><div class="row"><span class="tag" style="background:${c.color};color:${c.txt}">${esc(c.name)}</span><span class="tag" style="background:${STATUS_COR[r.status]}">${r.status}</span></div><div style="font-weight:700;margin-top:6px;line-height:1.3">${esc(r.pergunta)}</div></div>`}).join(''):'<div class="small">Você ainda não mandou nenhuma.</div>';
+}
+
+/* =========================================================
+   PAINEL ADMIN
+   ========================================================= */
+const ADM={tab:'aprovar',lista:null,filtro:{busca:'',cat:'',status:''}};
+function admin(tab){
+  if(!isAdmin()) return home();
+  VIEW='admin'; ADM.tab=tab||ADM.tab;
+  const tabs=[['aprovar','Aprovar'+(PEND?` (${PEND})`:'')],['perguntas','Perguntas'],['numeros','Números'],['ajustes','Ajustes'],['equipe','Equipe']];
+  render(`<div class="row"><button class="iconbtn" id="back" aria-label="Voltar">‹</button><span class="pill bang" style="font-size:18px;font-weight:400">PAINEL ADMIN</span><span style="width:44px"></span></div>
+  <div class="tabs">${tabs.map(([k,l])=>`<button class="tab ${ADM.tab===k?'on':''}" data-t="${k}">${l}</button>`).join('')}</div>
+  <div id="adm" class="stack"><div class="small">Carregando…</div></div>`,true);
+  document.getElementById('back').onclick=()=>{carregarPerguntas();home()};
+  document.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>admin(b.dataset.t));
+  ({aprovar:admAprovar,perguntas:admPerguntas,numeros:admNumeros,ajustes:admAjustes,equipe:admEquipe})[ADM.tab]();
+}
+const box=()=>document.getElementById('adm');
+function qCard(r,acts){
+  const c=catById(r.categoria)||CATS[0];
+  return `<div class="card" style="padding:12px 14px;border-radius:16px;box-shadow:4px 4px 0 #1a1a1a" data-id="${r.id}">
+  <div class="row"><span class="tag" style="background:${c.color};color:${c.txt}">${esc(c.name)}</span><span style="display:flex;gap:6px"><span class="tag" style="background:${STATUS_COR[r.status]}">${r.status}</span>${r.ativa?'':'<span class="tag" style="background:#ddd">inativa</span>'}</span></div>
+  <div style="font-weight:800;margin-top:8px;line-height:1.3">${esc(r.pergunta)}</div>
+  <div style="font-size:14px;margin-top:6px;line-height:1.5"><span style="color:#0f6b45;font-weight:800">✔ ${esc(r.certa)}</span><br><span style="color:#8a1c25">✘ ${esc(r.errada1)} · ${esc(r.errada2)} · ${esc(r.errada3)}</span></div>
+  ${r.explicacao?`<div class="small" style="font-weight:500;margin-top:6px">${esc(r.explicacao)}</div>`:''}
+  <div class="small" style="margin-top:6px;color:#555">${r.origem==='oficial'?'Oficial':'por '+esc(r.autor_nome||'jogador')} · ${new Date(r.criada_em).toLocaleDateString('pt-BR')}</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">${acts}</div></div>`;
+}
+const SEL='id,categoria,pergunta,certa,errada1,errada2,errada3,explicacao,status,ativa,origem,autor_nome,criada_em';
+
+async function admAprovar(){
+  const {data,error}=await sb.from('perguntas').select(SEL).eq('status','pendente').order('criada_em',{ascending:true}).limit(200);
+  if(!box()) return;
+  if(error){box().innerHTML='<div class="card" style="padding:16px">Não deu pra carregar.</div>';return}
+  PEND=data.length;
+  box().innerHTML=data.length?data.map(r=>qCard(r,`<button class="mini g" data-ap="${r.id}">Aprovar</button><button class="mini" data-ed="${r.id}">Editar</button><button class="mini r" data-rc="${r.id}">Recusar</button>`)).join(''):'<div class="card" style="padding:18px;text-align:center"><div class="bang" style="font-size:24px">TUDO LIMPO</div><div style="font-weight:500">Nenhuma pergunta esperando aprovação.</div></div>';
+  const byId=id=>data.find(x=>x.id===id);
+  box().querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>mudarStatus(b.dataset.ap,'aprovada',b));
+  box().querySelectorAll('[data-rc]').forEach(b=>b.onclick=()=>{if(b.dataset.arm!=='1'){b.dataset.arm='1';b.textContent='Confirmar';return}mudarStatus(b.dataset.rc,'recusada',b)});
+  box().querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editar(byId(b.dataset.ed),'aprovar'));
+}
+async function mudarStatus(id,status,btn){
+  btn.disabled=true;
+  const {error}=await sb.from('perguntas').update({status}).eq('id',id);
+  if(error){btn.disabled=false;btn.textContent='Erro, tenta de novo';return}
+  const card=btn.closest('[data-id]'); if(card) card.remove();
+  PEND=Math.max(0,PEND-1);
+  const t=document.querySelector('[data-t="aprovar"]'); if(t) t.textContent='Aprovar'+(PEND?` (${PEND})`:'');
+  if(box()&&!box().querySelector('[data-id]')) admAprovar();
+}
+
+async function admPerguntas(){
+  if(!ADM.lista){
+    const {data}=await sb.from('perguntas').select(SEL).order('criada_em',{ascending:false}).limit(3000);
+    ADM.lista=data||[];
+  }
+  if(!box()) return;
+  const f=ADM.filtro;
+  box().innerHTML=`<div class="card" style="padding:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+  <label class="fl" style="grid-column:1/-1">Buscar<input id="fb" value="${esc(f.busca)}" placeholder="Palavra da pergunta ou resposta"></label>
+  <label class="fl">Categoria<select id="fcat2"><option value="">Todas</option>${CATS.map(c=>`<option value="${c.id}" ${f.cat===c.id?'selected':''}>${esc(c.name)}</option>`).join('')}</select></label>
+  <label class="fl">Status<select id="fst2"><option value="">Todos</option>${['aprovada','pendente','recusada'].map(s=>`<option ${f.status===s?'selected':''}>${s}</option>`).join('')}</select></label></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn sm" id="nova" style="background:#18A36A">+ NOVA</button><button class="btn sm" id="csv" style="background:#fff">BAIXAR CSV</button></div>
+  <div class="small" id="cont"></div><div class="stack" id="lst"></div>`;
+  const draw=()=>{
+    const b=norm(f.busca);
+    const rows=ADM.lista.filter(r=>(!f.cat||r.categoria===f.cat)&&(!f.status||r.status===f.status)&&(!b||norm([r.pergunta,r.certa,r.errada1,r.errada2,r.errada3,r.explicacao,r.autor_nome].join(' ')).includes(b)));
+    document.getElementById('cont').textContent=`${rows.length} pergunta${rows.length===1?'':'s'}`;
+    const shown=rows.slice(0,150);
+    document.getElementById('lst').innerHTML=shown.map(r=>qCard(r,`<button class="mini" data-ed="${r.id}">Editar</button><button class="mini ${r.ativa?'':'g'}" data-at="${r.id}">${r.ativa?'Desativar':'Ativar'}</button><button class="mini r" data-rm="${r.id}">Apagar</button>`)).join('')+(rows.length>150?'<div class="small">Mostrando 150. Use a busca pra achar as outras.</div>':'');
+    const byId=id=>ADM.lista.find(x=>x.id===id);
+    document.querySelectorAll('#lst [data-ed]').forEach(x=>x.onclick=()=>editar(byId(x.dataset.ed),'perguntas'));
+    document.querySelectorAll('#lst [data-at]').forEach(x=>x.onclick=async()=>{const r=byId(x.dataset.at);x.disabled=true;const {error}=await sb.from('perguntas').update({ativa:!r.ativa}).eq('id',r.id);if(!error)r.ativa=!r.ativa;draw()});
+    document.querySelectorAll('#lst [data-rm]').forEach(x=>x.onclick=async()=>{if(x.dataset.arm!=='1'){x.dataset.arm='1';x.textContent='Confirmar';return}x.disabled=true;const {error}=await sb.from('perguntas').delete().eq('id',x.dataset.rm);if(!error)ADM.lista=ADM.lista.filter(r=>r.id!==x.dataset.rm);draw()});
+  };
+  document.getElementById('fb').oninput=e=>{f.busca=e.target.value;draw()};
+  document.getElementById('fcat2').onchange=e=>{f.cat=e.target.value;draw()};
+  document.getElementById('fst2').onchange=e=>{f.status=e.target.value;draw()};
+  document.getElementById('nova').onclick=()=>editar(null,'perguntas');
+  document.getElementById('csv').onclick=()=>baixarCSV(ADM.lista);
+  draw();
+}
+function editar(r,back){
+  VIEW='admin-edit';
+  const p=r?{cat:r.categoria,q:r.pergunta,c:r.certa,w:[r.errada1,r.errada2,r.errada3],ex:r.explicacao,status:r.status,ativa:r.ativa}:{cat:ADM.filtro.cat||'mcs',status:'aprovada',ativa:true};
+  render(`<div class="row"><button class="iconbtn" id="back" aria-label="Voltar">‹</button><span class="pill bang" style="font-size:18px;font-weight:400">${r?'EDITAR':'NOVA'} PERGUNTA</span><span style="width:44px"></span></div>
+  ${r&&r.origem==='galera'?`<div class="small" style="text-align:center">Enviada por ${esc(r.autor_nome||'jogador')}</div>`:''}${formHTML(p,true)}`,true);
+  document.getElementById('back').onclick=()=>admin(back);
+  document.getElementById('f').onsubmit=async e=>{
+    e.preventDefault();
+    const {r:row,erro}=readForm(true);const err=document.getElementById('ferr'),btn=document.getElementById('salvar');
+    if(erro){err.textContent=erro;return}
+    btn.disabled=true;
+    let res;
+    if(r) res=await sb.from('perguntas').update(row).eq('id',r.id);
+    else res=await sb.from('perguntas').insert({...row,origem:'oficial',autor_id:AUTH.uid,autor_nome:(AUTH.perfil||{}).nome||null});
+    btn.disabled=false;
+    if(res.error){err.textContent='Não deu pra salvar: '+(res.error.message||'erro');return}
+    ADM.lista=null; carregarPerguntas(); contarPendentes(); admin(back);
+  };
+}
+function baixarCSV(rows){
+  const cell=v=>{v=String(v??'');return /[";\n\r]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const head=['id','status','ativa','origem','autor','categoria','pergunta','certa','errada1','errada2','errada3','explicacao','criada_em'];
+  const csv='﻿'+[head,...rows.map(r=>[r.id,r.status,r.ativa?'SIM':'NÃO',r.origem,r.autor_nome||'',(catById(r.categoria)||{}).name,r.pergunta,r.certa,r.errada1,r.errada2,r.errada3,r.explicacao,r.criada_em])].map(r=>r.map(cell).join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download='roda-da-rima-perguntas.csv';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+}
+
+async function admNumeros(){
+  const {data,error}=await sb.rpc('painel_stats');
+  if(!box()) return;
+  if(error||!data){box().innerHTML='<div class="card" style="padding:16px">Não deu pra carregar os números.</div>';return}
+  const d=data;
+  const stat=(l,v)=>`<div class="stat"><b>${v}</b><span class="small">${l}</span></div>`;
+  const cats=(d.por_categoria||[]).map(x=>{const c=catById(x.categoria)||{name:x.categoria,color:'#ddd',txt:'#1a1a1a'};const pct=x.respondidas?Math.round(100*x.acertos/x.respondidas):0;
+    return `<div class="row" style="padding:8px 0;border-bottom:1px solid #ddd"><span class="tag" style="background:${c.color};color:${c.txt}">${esc(c.name)}</span><span class="small">${x.ativas} ativas · ${x.respondidas} respostas · ${pct}% acerto</span></div>`}).join('');
+  const piores=(d.mais_erradas||[]).map(x=>`<div style="padding:8px 0;border-bottom:1px solid #ddd"><div style="font-weight:700;line-height:1.3">${esc(x.pergunta)}</div><div class="small">${x.pct}% de acerto em ${x.respostas} respostas</div></div>`).join('')||'<div class="small">Precisa de pelo menos 5 respostas por pergunta.</div>';
+  box().innerHTML=`<div class="grid2">${stat('partidas',d.partidas)}${stat('jogadores que jogaram',d.jogadores)}${stat('contas criadas',d.cadastrados)}${stat('vitórias',d.vitorias)}${stat('maior pontuação',d.maior)}${stat('média de pontos',d.media)}</div>
+  <div class="card" style="padding:12px 14px"><div class="bang" style="font-size:20px">POR CATEGORIA</div>${cats}</div>
+  <div class="card" style="padding:12px 14px"><div class="bang" style="font-size:20px">AS QUE MAIS DERRUBAM</div>${piores}</div>`;
+}
+
+async function admAjustes(){
+  await carregarConfig();
+  if(!box()) return;
+  const n=(id,l,v,min,max,h)=>`<label class="fl">${l}<input id="${id}" type="number" inputmode="numeric" min="${min}" max="${max}" value="${v}"><span class="small" style="font-weight:500">${h}</span></label>`;
+  box().innerHTML=`<form id="cf" class="card stack" style="padding:16px" novalidate>
+  ${n('cv','Vidas',CFG.vidas,1,10,'Quantos erros o jogador aguenta.')}
+  ${n('ct','Tempo por pergunta (segundos)',CFG.tempo,5,120,'')}
+  ${n('cti','Tempo no Impossível (segundos)',CFG.tempo_impossivel,5,120,'')}
+  ${n('cm','Acertos pra encher o medidor',CFG.medidor,1,10,'Quando enche, o jogador escolhe um personagem.')}
+  <label class="check"><input type="checkbox" id="ci" ${CFG.impossivel_enche?'checked':''}> Acertar o Impossível enche o medidor na hora</label>
+  <div id="cerr" class="small" style="color:#B3261E"></div>
+  <button class="btn" type="submit" id="csalvar" style="background:#18A36A">SALVAR AJUSTES</button><div id="cok" class="small" style="text-align:center"></div></form>`;
+  document.getElementById('cf').onsubmit=async e=>{
+    e.preventDefault();
+    const g=id=>parseInt(document.getElementById(id).value,10);
+    const row={vidas:g('cv'),tempo:g('ct'),tempo_impossivel:g('cti'),medidor:g('cm'),impossivel_enche:document.getElementById('ci').checked,atualizado_em:new Date().toISOString()};
+    const bad=[[row.vidas,1,10],[row.tempo,5,120],[row.tempo_impossivel,5,120],[row.medidor,1,10]].some(([v,a,b])=>!(v>=a&&v<=b));
+    if(bad){document.getElementById('cerr').textContent='Algum valor está fora do limite.';return}
+    document.getElementById('cerr').textContent='';
+    const {error}=await sb.from('config').update(row).eq('id',1);
+    if(error){document.getElementById('cerr').textContent='Não deu pra salvar.';return}
+    CFG={...CFG,...row};document.getElementById('cok').innerHTML='<b style="color:#0f6b45">Salvo!</b> Vale na próxima partida de todo mundo.';
+  };
+}
+
+async function admEquipe(){
+  const {data}=await sb.from('perfis').select('id,nome,avatar,papel,criado_em').order('criado_em',{ascending:false}).limit(500);
+  if(!box()) return;
+  const rows=data||[];
+  box().innerHTML=`<label class="fl">Buscar pessoa<input id="eb" placeholder="Nome"></label><div class="small" id="ec"></div><div class="stack" id="el"></div>`;
+  const draw=q=>{
+    const b=norm(q);const list=rows.filter(r=>!b||norm(r.nome).includes(b)).sort((a,b)=>(a.papel==='admin'?-1:0)-(b.papel==='admin'?-1:0));
+    document.getElementById('ec').textContent=`${rows.length} conta${rows.length===1?'':'s'} · ${rows.filter(r=>r.papel==='admin').length} admin`;
+    document.getElementById('el').innerHTML=list.slice(0,100).map(r=>`<div class="card row" style="padding:10px 12px;border-radius:14px;box-shadow:3px 3px 0 #1a1a1a"><span style="display:flex;align-items:center;gap:10px;min-width:0">${r.avatar?`<img src="${esc(r.avatar)}" alt="" referrerpolicy="no-referrer" style="width:36px;height:36px;border-radius:50%;border:2px solid #1a1a1a;flex:0 0 36px">`:''}<span style="min-width:0"><span style="font-weight:800;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.nome||'Sem nome')}</span><span class="small">${r.papel}</span></span></span>${r.id===AUTH.uid?'<span class="small">você</span>':`<button class="mini ${r.papel==='admin'?'r':'g'}" data-pp="${r.id}">${r.papel==='admin'?'Tirar admin':'Tornar admin'}</button>`}</div>`).join('');
+    document.querySelectorAll('[data-pp]').forEach(x=>x.onclick=async()=>{
+      if(x.dataset.arm!=='1'){x.dataset.arm='1';x.textContent='Confirmar';return}
+      const r=rows.find(y=>y.id===x.dataset.pp);const novo=r.papel==='admin'?'jogador':'admin';x.disabled=true;
+      const {error}=await sb.from('perfis').update({papel:novo}).eq('id',r.id);if(!error)r.papel=novo;draw(document.getElementById('eb').value);
+    });
+  };
+  document.getElementById('eb').oninput=e=>draw(e.target.value);
+  draw('');
+}
+
+/* ---------- início ---------- */
+(async function boot(){
+  newGame(); home();
+  if(!sb) return;
+  try{
+    const {data}=await sb.auth.getSession();
+    await setSession(data.session);
+    if(location.hash.includes('access_token')||location.search.includes('code=')) history.replaceState(null,'',location.pathname);
+  }catch(e){}
+  sb.auth.onAuthStateChange((_ev,s)=>{setTimeout(()=>setSession(s),0)});
+  await Promise.all([carregarConfig(),carregarPerguntas()]);
+  if(VIEW==='home') home();
+})();
+
+</script>
+</body>
+</html>
