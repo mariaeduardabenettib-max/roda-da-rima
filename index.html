@@ -389,13 +389,13 @@ async function contarPendentes(){
 /* ---------- home ---------- */
 function home(){
   VIEW='home'; newGame();
-  render(`<div class="row" style="justify-content:flex-end;min-height:44px">${acctChip()}</div>
+  render(`${AUTH.uid?`<div class="row" style="justify-content:flex-end;min-height:44px">${acctChip()}</div>`:''}
   <div style="text-align:center" class="hide-short"><span class="bubble" style="display:inline-block;border-radius:999px;padding:6px 16px">O QUIZ DA BATALHA DE RIMA</span></div>
   <h1 class="title3d t-xl" style="margin-top:4px">RODA DA<br>RIMA</h1>
   <div class="avrow">${CATS.map(c=>`<div class="avatar" style="background:${c.bg||c.color}">${mascot(c.m)}</div>`).join('')}</div>
   <div class="card howto" style="padding:12px 16px"><div class="bang" style="font-size:22px">COMO JOGAR</div>
   <div style="font-size:clamp(14px,4.2vw,16px);line-height:1.45;font-weight:500">Gira, responde, enche o medidor. Escolhe quem vai pro teu bonde e prova que conhece. Fechou os 5? Rei da roda. ${CFG.vidas} vida${CFG.vidas===1?'':'s'}, sem vacilo.</div></div>
-  <div style="margin-top:auto;padding-top:6px" class="stack"><button class="btn" id="go"><svg width="20" height="22" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2 L20 12 L3 22 Z" fill="#1a1a1a"/></svg>JOGAR</button>
+  <div style="margin-top:auto;padding-top:6px" class="stack">${sb&&!AUTH.uid?`<button class="btn sm" id="acct" style="background:#fff">${GOOGLE}ENTRAR COM GOOGLE</button>`:''}<button class="btn" id="go"><svg width="20" height="22" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2 L20 12 L3 22 Z" fill="#1a1a1a"/></svg>JOGAR</button>
   <button class="btn sm" id="criar" style="background:#18A36A">+ ADICIONAR PERGUNTA</button>
   <div class="small" style="text-align:center">Recorde: ${best()} pts</div></div>`);
   bindAcct();
