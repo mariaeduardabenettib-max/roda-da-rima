@@ -124,6 +124,7 @@ img,svg{-webkit-user-drag:none}
   .howto div:last-child{font-size:13.5px!important;line-height:1.38!important}
   .pick{padding:5px 12px}
 }
+
 </style>
 </head>
 <body>
@@ -306,12 +307,13 @@ async function setSession(s){
   if(uid===AUTH.uid && (AUTH.perfil||!uid)) return;
   AUTH.uid=uid;AUTH.user=s?s.user:null;AUTH.perfil=null;
   if(uid){
-    const {data}=await sb.from('perfis').select('id,nome,avatar,papel').eq('id',uid).maybeSingle();
+    const {data}=await sb.from('perfis').select('id,nome,avatar,papel,vulgo').eq('id',uid).maybeSingle();
     AUTH.perfil=data||{id:uid,nome:(s.user.user_metadata||{}).full_name||'',avatar:(s.user.user_metadata||{}).avatar_url||'',papel:'jogador'};
     carregarVistos();
     if(isAdmin()) contarPendentes();
-  }
-  if(VIEW==='home') home(); if(VIEW==='criar') criar();
+    carregarRede();
+  } else {REDE.dados=REDE.rank=REDE.feed=null}
+  if(VIEW==='home') home(); if(VIEW==='criar') criar(); if(VIEW==='comunidade') comunidade();
 }
 
 /* ---------- perguntas já vistas ---------- */
@@ -369,7 +371,7 @@ function bindAcct(){
 function menuConta(){
   const p=AUTH.perfil||{};
   const el=document.createElement('div');el.className='sheet';
-  el.innerHTML=`<div class="card stack fade"><div class="row" style="justify-content:flex-start;gap:12px">${p.avatar?`<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer" style="width:48px;height:48px;border-radius:50%;border:3px solid #1a1a1a">`:''}<div><div style="font-weight:800">${esc(p.nome||'')}</div><div class="small">${isAdmin()?'Admin':'Jogador'}</div></div></div>
+  el.innerHTML=`<div class="card stack fade"><div class="row" style="justify-content:flex-start;gap:12px">${p.avatar?`<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer" style="width:48px;height:48px;border-radius:50%;border:3px solid #1a1a1a">`:''}<div><div style="font-weight:800">${esc(p.nome||'')}</div><div class="small">${p.vulgo?'@'+esc(p.vulgo)+' · ':''}${isAdmin()?'Admin':'Jogador'}</div></div></div>
   ${isAdmin()?`<button class="btn sm" id="m-admin" style="background:#3C7DD9;color:#fff">PAINEL ADMIN ${PEND?`<span class="badge">${PEND}</span>`:''}</button>`:''}
   <button class="btn sm" id="m-sair" style="background:#fff">SAIR DA CONTA</button>
   <button class="btn sm" id="m-fechar" style="background:#E8E6E1">FECHAR</button></div>`;
@@ -396,11 +398,12 @@ function home(){
   <div class="card howto" style="padding:12px 16px"><div class="bang" style="font-size:22px">COMO JOGAR</div>
   <div style="font-size:clamp(14px,4.2vw,16px);line-height:1.45;font-weight:500">Gira, responde, enche o medidor. Escolhe quem vai pro teu bonde e prova que conhece. Fechou os 5? Rei da roda. ${CFG.vidas} vida${CFG.vidas===1?'':'s'}, sem vacilo.</div></div>
   <div style="margin-top:auto;padding-top:6px" class="stack">${sb&&!AUTH.uid?`<button class="btn sm" id="acct" style="background:#fff">${GOOGLE}ENTRAR COM GOOGLE</button>`:''}<button class="btn" id="go"><svg width="20" height="22" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2 L20 12 L3 22 Z" fill="#1a1a1a"/></svg>JOGAR</button>
-  <button class="btn sm" id="criar" style="background:#18A36A">+ ADICIONAR PERGUNTA</button>
+  <div class="grid2"><button class="btn sm" id="criar" style="background:#18A36A">+ PERGUNTA</button><button class="btn sm" id="com" style="background:#3C7DD9;color:#fff">COMUNIDADE${pedidosNovos()?`<span class="badge">${pedidosNovos()}</span>`:''}</button></div>
   <div class="small" style="text-align:center">Recorde: ${best()} pts</div></div>`);
   bindAcct();
   document.getElementById('go').onclick=wheel;
   document.getElementById('criar').onclick=criar;
+  document.getElementById('com').onclick=()=>comunidade();
 }
 
 /* ---------- roleta ---------- */
@@ -594,6 +597,146 @@ async function minhas(){
   const {data}=await sb.from('perguntas').select('id,categoria,pergunta,status,criada_em').eq('autor_id',AUTH.uid).order('criada_em',{ascending:false}).limit(30);
   if(!document.getElementById('minhas')) return;
   box.innerHTML=(data&&data.length)?data.map(r=>{const c=catById(r.categoria);return `<div class="card" style="padding:10px 12px;border-radius:14px;box-shadow:3px 3px 0 #1a1a1a"><div class="row"><span class="tag" style="background:${c.color};color:${c.txt}">${esc(c.name)}</span><span class="tag" style="background:${STATUS_COR[r.status]}">${r.status}</span></div><div style="font-weight:700;margin-top:6px;line-height:1.3">${esc(r.pergunta)}</div></div>`}).join(''):'<div class="small">Você ainda não mandou nenhuma.</div>';
+}
+
+/* =========================================================
+   COMUNIDADE (vulgo, parças, ranking, atividade)
+   ========================================================= */
+const REDE={dados:null,tab:'ranking',rank:null,feed:null};
+const VULGO_RE=/^[a-z0-9_.]{3,20}$/;
+const limpaVulgo=v=>String(v||'').trim().replace(/^@+/,'').toLowerCase();
+const erroMsg=e=>{const m=String((e&&e.message)||'');return /[À-ú]|vulgo|amizade|Pedido|Entre/.test(m)&&m.length<90?m:'Deu ruim na conexão. Tenta de novo.'};
+function foto(p,size){
+  size=size||40;const s=`width:${size}px;height:${size}px;flex:0 0 ${size}px;border-radius:50%;border:2.5px solid #1a1a1a;`;
+  if(p&&p.avatar) return `<img src="${esc(p.avatar)}" alt="" referrerpolicy="no-referrer" style="${s}object-fit:cover;background:#fff">`;
+  const l=String((p&&(p.vulgo||p.nome))||'?').charAt(0).toUpperCase();
+  return `<span class="bang" style="${s}display:inline-flex;align-items:center;justify-content:center;background:#F5A623;font-size:${Math.round(size*.5)}px">${esc(l)}</span>`;
+}
+function quando(t){
+  const d=(Date.now()-Date.parse(t))/1000;if(!(d>=0))return '';
+  if(d<60)return 'agora';if(d<3600)return `há ${Math.floor(d/60)} min`;if(d<86400)return `há ${Math.floor(d/3600)} h`;
+  if(d<86400*7){const n=Math.floor(d/86400);return `há ${n} dia${n>1?'s':''}`}
+  return new Date(t).toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});
+}
+async function carregarRede(){
+  if(!sb||!AUTH.uid) return null;
+  const {data,error}=await sb.rpc('minha_rede');
+  if(!error&&data){REDE.dados=data;if(data.eu&&AUTH.perfil)AUTH.perfil.vulgo=data.eu.vulgo}
+  if(VIEW==='home') home();
+  return REDE.dados;
+}
+const pedidosNovos=()=>(REDE.dados&&REDE.dados.recebidos||[]).length;
+
+async function comunidade(tab){
+  VIEW='comunidade'; if(tab) REDE.tab=tab;
+  const top=`<div class="row"><button class="iconbtn" id="back" aria-label="Voltar">‹</button><span class="pill bang" style="font-size:18px;font-weight:400">COMUNIDADE</span><span style="width:44px"></span></div>`;
+  const voltar=()=>{document.getElementById('back').onclick=home};
+  if(!sb){render(top+`<div class="card" style="padding:16px">O jogo ainda não está ligado no banco.</div>`);voltar();return}
+  if(!AUTH.uid){
+    render(top+`<h2 class="title3d t-l" style="margin-top:4px">TEUS<br>PARÇAS</h2><div class="card stack" style="padding:16px;text-align:center"><div style="font-weight:600;line-height:1.45">Entra com tua conta Google, cria teu vulgo e adiciona os parça pra ver quem tá mandando na roda.</div><button class="acct login" id="acct" style="align-self:center">${GOOGLE}<span>Entrar com Google</span></button></div>`);
+    bindAcct();voltar();return;
+  }
+  if(!REDE.dados){render(top+`<div class="small" style="text-align:center;margin-top:30px">Carregando…</div>`);voltar();await carregarRede();if(VIEW!=='comunidade')return}
+  const R=REDE.dados||{eu:{},recebidos:[],enviados:[],amigos:[]};
+  if(!R.eu||!R.eu.vulgo) return escolherVulgo(top);
+  const tabs=[['ranking','Ranking'],['atividade','Atividade'],['parcas',`Parças${R.amigos.length?` (${R.amigos.length})`:''}`]];
+  render(top+`
+  <div class="card" style="padding:12px 14px"><div class="row" style="gap:10px;justify-content:flex-start">${foto(R.eu,44)}
+    <div style="flex:1;min-width:0"><div class="small" style="margin:0">teu vulgo</div><div class="bang" style="font-size:24px;line-height:1.05;overflow:hidden;text-overflow:ellipsis">@${esc(R.eu.vulgo)}</div></div>
+    <button class="mini" id="trocar">trocar</button></div>
+    <form id="add" style="display:flex;gap:8px;margin-top:10px"><div class="fl" style="flex:1;min-width:0"><input id="addv" placeholder="@vulgo" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="21" aria-label="Vulgo do parça"></div><button class="btn sm" id="addb" style="width:auto;padding:0 14px;min-height:46px;background:#18A36A">ADICIONAR</button></form>
+    <div id="addmsg" class="small" style="min-height:0;margin-top:6px;font-weight:700"></div></div>
+  ${R.recebidos.length?`<div class="card stack" style="padding:12px 14px;background:#FFF4DC"><div class="bang" style="font-size:20px">QUEREM COLAR CONTIGO</div>${R.recebidos.map(p=>`<div class="row" style="gap:8px 10px;justify-content:flex-start;flex-wrap:wrap">${foto(p,38)}<div style="flex:1 1 110px;min-width:0"><div style="font-weight:800;overflow:hidden;text-overflow:ellipsis">@${esc(p.vulgo)}</div><div class="small" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.nome||'')}</div></div><span style="display:flex;gap:8px;margin-left:auto"><button class="mini g" data-ok="${p.id}">Aceitar</button><button class="mini r" data-no="${p.id}">Recusar</button></span></div>`).join('')}</div>`:''}
+  <div class="tabs" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr))">${tabs.map(([k,l])=>`<button class="tab ${REDE.tab===k?'on':''}" style="padding:7px 4px;font-size:clamp(12.5px,3.9vw,14px)" data-ct="${k}">${l}</button>`).join('')}</div>
+  <div id="rede" class="stack"><div class="small">Carregando…</div></div>`);
+  voltar();
+  document.getElementById('trocar').onclick=()=>escolherVulgo(top,R.eu.vulgo);
+  document.querySelectorAll('[data-ct]').forEach(b=>b.onclick=()=>comunidade(b.dataset.ct));
+  document.querySelectorAll('[data-ok],[data-no]').forEach(b=>b.onclick=async()=>{
+    b.disabled=true;const id=+(b.dataset.ok||b.dataset.no);
+    const {error}=await sb.rpc('responder_amizade',{pedido:id,aceitar:!!b.dataset.ok});
+    if(error){b.disabled=false;return}
+    REDE.rank=REDE.feed=null;await carregarRede();comunidade();
+  });
+  document.getElementById('add').onsubmit=async e=>{
+    e.preventDefault();const msg=document.getElementById('addmsg'),btn=document.getElementById('addb');
+    const v=limpaVulgo(document.getElementById('addv').value);
+    msg.style.color='#8a1c25';
+    if(!v){msg.textContent='Digita o vulgo do parça.';return}
+    if(v===R.eu.vulgo){msg.textContent='Esse vulgo é o teu.';return}
+    btn.disabled=true;msg.style.color='#555';msg.textContent='Procurando…';
+    const {data,error}=await sb.rpc('pedir_amizade',{alvo:v});btn.disabled=false;
+    if(error){msg.style.color='#8a1c25';msg.textContent=erroMsg(error);return}
+    const txt={enviado:`Pedido enviado pra @${v}. Quando aceitar, aparece aqui.`,aceita:`Fechou! Tu e @${v} agora são parças.`,ja_amigos:`Tu e @${v} já são parças.`,ja_pedido:`Já tem pedido pendente com @${v}.`}[data]||'Feito.';
+    if(data==='aceita'){REDE.rank=REDE.feed=null;await carregarRede();REDE.tab='ranking';comunidade();setTimeout(()=>{const m=document.getElementById('addmsg');if(m){m.style.color='#0f6b45';m.textContent=txt}},0);return}
+    msg.style.color=data==='enviado'?'#0f6b45':'#555';msg.textContent=txt;document.getElementById('addv').value='';
+    if(data==='enviado'){await carregarRede();if(REDE.tab==='parcas'&&VIEW==='comunidade')redeParcas()}
+  };
+  ({ranking:redeRanking,atividade:redeAtividade,parcas:redeParcas})[REDE.tab]();
+}
+
+function escolherVulgo(top,atual){
+  render(top+`<h2 class="title3d t-l" style="margin-top:4px">${atual?'TROCA TEU':'ESCOLHE TEU'}<br>VULGO</h2>
+  <div class="card stack" style="padding:16px"><div style="font-weight:600;line-height:1.45">É por ele que os parça te acham na roda. Letras minúsculas, números, ponto ou _ (3 a 20).</div>
+  <form id="vf" class="stack"><div class="fl"><div style="display:flex;align-items:center;gap:6px"><span class="bang" style="font-size:28px">@</span><input id="vi" value="${esc(atual||'')}" placeholder="teu_vulgo" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="21" aria-label="Vulgo"></div></div>
+  <div id="verr" class="small" style="color:#8a1c25;font-weight:700;min-height:0"></div>
+  <button class="btn sm" id="vsalvar" style="background:#18A36A">SALVAR VULGO</button>${atual?`<button type="button" class="btn sm" id="vcanc" style="background:#fff">CANCELAR</button>`:''}</form></div>`);
+  document.getElementById('back').onclick=atual?()=>comunidade():home;
+  const c=document.getElementById('vcanc');if(c)c.onclick=()=>comunidade();
+  const inp=document.getElementById('vi');
+  inp.oninput=()=>{const p=inp.selectionStart;const v=inp.value.replace(/^@+/,'').toLowerCase().replace(/\s/g,'_');if(v!==inp.value){inp.value=v;try{inp.setSelectionRange(p,p)}catch(e){}}};
+  document.getElementById('vf').onsubmit=async e=>{
+    e.preventDefault();const err=document.getElementById('verr'),b=document.getElementById('vsalvar');
+    const v=limpaVulgo(inp.value);
+    if(!VULGO_RE.test(v)){err.textContent='Use de 3 a 20 letras minúsculas, números, ponto ou _';return}
+    if(v===atual) return comunidade();
+    b.disabled=true;err.textContent='';
+    const {error}=await sb.rpc('definir_vulgo',{novo:v});b.disabled=false;
+    if(error){err.textContent=erroMsg(error);return}
+    if(REDE.dados&&REDE.dados.eu)REDE.dados.eu.vulgo=v;if(AUTH.perfil)AUTH.perfil.vulgo=v;
+    REDE.rank=REDE.feed=null;await carregarRede();comunidade();
+  };
+}
+const redeBox=()=>document.getElementById('rede');
+const vazioRede=t=>`<div class="card" style="padding:16px;text-align:center;font-weight:600;line-height:1.45">${t}</div>`;
+async function redeRanking(){
+  if(!REDE.rank){const {data}=await sb.rpc('ranking_amigos');REDE.rank=data||[]}
+  const b=redeBox();if(!b||REDE.tab!=='ranking')return;
+  const L=REDE.rank;
+  if(L.length<2){b.innerHTML=vazioRede('Ainda tá só tu na roda. Adiciona os parça pelo vulgo e vê quem manda.')+(L[0]?rankCard(L[0],1):'');return}
+  b.innerHTML=L.map((r,i)=>rankCard(r,i+1)).join('');
+}
+function rankCard(r,pos){
+  const med=['#F5A623','#C9CED6','#D9A066'][pos-1];
+  return `<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:4px 4px 0 #1a1a1a;${r.eu?'background:#FFF4DC;':''}">
+  <div class="row" style="gap:10px;justify-content:flex-start">
+  <span class="bang" style="width:30px;height:30px;flex:0 0 30px;border-radius:50%;border:2.5px solid #1a1a1a;display:inline-flex;align-items:center;justify-content:center;font-size:18px;background:${med||'#fff'}">${pos}</span>
+  ${foto(r,38)}
+  <div style="flex:1;min-width:0"><div style="font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${esc(r.vulgo||'')}${r.eu?' <span class="tag" style="background:#1a1a1a;color:#fff;font-size:11px">você</span>':''}</div>
+  <div class="small" style="margin:0;font-size:12px;line-height:1.3">${r.vitorias} vitória${r.vitorias==1?'':'s'} · ${r.partidas} partida${r.partidas==1?'':'s'} · ${r.acerto}% acerto</div></div>
+  <div style="text-align:right"><div class="bang" style="font-size:22px;line-height:1">${r.recorde}</div><div class="small" style="margin:0;font-size:11px">recorde</div></div></div></div>`;
+}
+async function redeAtividade(){
+  if(!REDE.feed){const {data}=await sb.rpc('atividade_amigos');REDE.feed=data||[]}
+  const b=redeBox();if(!b||REDE.tab!=='atividade')return;
+  if(!REDE.feed.length){b.innerHTML=vazioRede((REDE.dados.amigos||[]).length?'Os parça ainda não jogaram. Quando rolar partida, aparece aqui.':'Adiciona os parça pelo vulgo pra acompanhar o que eles andam fazendo na roda.');return}
+  b.innerHTML=REDE.feed.map(a=>`<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:3px 3px 0 #1a1a1a;${a.destaque?'background:#FFF4DC;':''}">
+  <div class="row" style="gap:10px;justify-content:flex-start;align-items:flex-start">${foto(a,36)}
+  <div style="flex:1;min-width:0;line-height:1.35"><b>@${esc(a.vulgo||'')}</b> ${esc(a.texto)}${a.destaque?' '+CROWN_SVG('#F5A623'):''}
+  <div class="small" style="margin:2px 0 0">${a.pontos!=null?`${a.pontos} pts · `:''}${quando(a.quando)}</div></div></div></div>`).join('');
+}
+function redeParcas(){
+  const b=redeBox();if(!b||REDE.tab!=='parcas')return;
+  const R=REDE.dados;
+  const linha=(p,btn)=>`<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:3px 3px 0 #1a1a1a"><div class="row" style="gap:10px;justify-content:flex-start">${foto(p,38)}<div style="flex:1;min-width:0"><div style="font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${esc(p.vulgo)}</div><div class="small" style="margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.nome||'')}</div></div>${btn}</div></div>`;
+  b.innerHTML=(R.amigos.length?R.amigos.map(p=>linha(p,`<button class="mini" data-rm="${p.id}">Desfazer</button>`)).join(''):vazioRede('Nenhum parça ainda. Manda o vulgo deles ali em cima.'))
+   +(R.enviados.length?`<div class="bang" style="font-size:20px;margin-top:6px">ESPERANDO RESPOSTA</div>`+R.enviados.map(p=>linha(p,`<button class="mini" data-rm="${p.id}">Cancelar</button>`)).join(''):'');
+  b.querySelectorAll('[data-rm]').forEach(x=>x.onclick=async()=>{
+    if(!x.dataset.arm){x.dataset.arm='1';x.textContent='Certeza?';x.classList.add('r');return}
+    x.disabled=true;const {error}=await sb.from('amizades').delete().eq('id',+x.dataset.rm);
+    if(error){x.disabled=false;return}
+    REDE.rank=REDE.feed=null;await carregarRede();if(VIEW==='comunidade')comunidade();
+  });
 }
 
 /* =========================================================
