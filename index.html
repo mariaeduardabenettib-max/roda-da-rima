@@ -130,6 +130,10 @@ img,svg{-webkit-user-drag:none}
   .howto div:last-child{font-size:13.5px!important;line-height:1.38!important}
   .pick{padding:5px 12px}
 }
+.seg{display:inline-flex;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff;box-shadow:2px 2px 0 var(--ink)}
+.seg button{border:0;background:transparent;font:800 13px 'Archivo',sans-serif;color:var(--ink);padding:7px 12px;cursor:pointer;min-height:36px}
+.seg button+button{border-left:2px solid var(--ink)}
+.seg button.on{background:var(--ink);color:#fff}
 
 </style>
 </head>
@@ -394,6 +398,46 @@ async function contarPendentes(){
   PEND=count||0; if(VIEW==='home') home();
 }
 
+/* ---------- instalar na tela de início ---------- */
+const UA=navigator.userAgent||'';
+const IOS=/iPhone|iPad|iPod/.test(UA)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const ANDROID=/Android/i.test(UA);
+const INAPP=/Instagram|FBAN|FBAV|FB_IAB|Line\/|TikTok|musical_ly|Snapchat/i.test(UA);
+const instalado=()=>{try{return matchMedia('(display-mode: standalone)').matches||matchMedia('(display-mode: fullscreen)').matches||navigator.standalone===true}catch(e){return false}};
+const podeInstalar=()=>(IOS||ANDROID)&&!instalado();
+function precisaInstalar(){ if(!podeInstalar()) return false; try{return !localStorage.getItem('rr_inst')}catch(e){return false} }
+let BIP=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();BIP=e;if(VIEW==='instalar')instalar()});
+window.addEventListener('appinstalled',()=>{try{localStorage.setItem('rr_inst','1')}catch(e){};if(VIEW==='instalar')home()});
+const IC_SHARE=`<svg width="22" height="26" viewBox="0 0 22 26" aria-hidden="true"><path d="M7 9H4.5A1.5 1.5 0 0 0 3 10.5v12A1.5 1.5 0 0 0 4.5 24h13a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 17.5 9H15" fill="none" stroke="#3C7DD9" stroke-width="2.2" stroke-linecap="round"/><path d="M11 16V2M6.5 6.5 11 2l4.5 4.5" fill="none" stroke="#3C7DD9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const IC_DOTS=`<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="4" r="2.2" fill="#1a1a1a"/><circle cx="11" cy="11" r="2.2" fill="#1a1a1a"/><circle cx="11" cy="18" r="2.2" fill="#1a1a1a"/></svg>`;
+const IC_PLUS=`<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="2" width="18" height="18" rx="4" fill="none" stroke="#1a1a1a" stroke-width="2.2"/><path d="M11 7v8M7 11h8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+function instalar(){
+  VIEW='instalar';
+  const passo=(n,ic,t)=>`<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:3px 3px 0 #1a1a1a"><div class="row" style="gap:12px;justify-content:flex-start"><span class="bang" style="width:30px;height:30px;flex:0 0 30px;border-radius:50%;border:2.5px solid #1a1a1a;background:#F5A623;display:inline-flex;align-items:center;justify-content:center;font-size:18px">${n}</span><span style="flex:1;font-weight:600;line-height:1.4">${t}</span>${ic?`<span style="flex:0 0 auto">${ic}</span>`:''}</div></div>`;
+  let passos='',topo='';
+  if(INAPP){
+    topo='Tu tá no navegador de dentro de outro app. Pra instalar, abre a Roda no navegador do celular:';
+    passos=passo(1,IC_DOTS,'Toca nos <b>⋯</b> (ou ⋮) no canto da tela.')+passo(2,'',`Escolhe <b>Abrir no ${IOS?'Safari':'navegador'}</b>.`)+passo(3,'','Lá, volta aqui e segue o passo a passo.');
+  } else if(IOS){
+    passos=passo(1,IC_SHARE,'Toca no botão <b>Compartilhar</b>. Se não aparecer, toca nos <b>⋯</b> primeiro.')
+      +passo(2,IC_PLUS,'Rola a lista e toca em <b>Adicionar à Tela de Início</b>.')
+      +passo(3,'','Deixa <b>Abrir como app web</b> ligado e toca em <b>Adicionar</b>.');
+  } else if(BIP){
+    passos=`<button class="btn" id="instnow" style="background:#18A36A">INSTALAR AGORA</button>`;
+  } else {
+    passos=passo(1,IC_DOTS,'Toca nos <b>⋮</b> no canto de cima do navegador.')+passo(2,IC_PLUS,'Toca em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.')+passo(3,'','Confirma em <b>Instalar</b>.');
+  }
+  render(`<h2 class="title3d t-l" style="margin-top:6px">BOTA A RODA<br>NO CELULAR</h2>
+  <div style="display:flex;justify-content:center"><img src="/apple-touch-icon.png" alt="Ícone da Roda da Rima" width="84" height="84" style="border-radius:20px;border:3px solid #1a1a1a;box-shadow:4px 4px 0 #1a1a1a;background:#F5A623"></div>
+  <div style="text-align:center;font-weight:600;line-height:1.45">${topo||'Fica igual app: abre direto da tela de início, em tela cheia, sem barra do navegador.'}</div>
+  <div class="stack" style="gap:10px">${passos}</div>
+  <div style="margin-top:auto" class="stack"><button class="btn sm" id="instok" style="background:#fff">AGORA NÃO, JOGAR NO NAVEGADOR</button></div>`);
+  document.getElementById('instok').onclick=()=>{try{localStorage.setItem('rr_inst','1')}catch(e){};home()};
+  const b=document.getElementById('instnow');
+  if(b) b.onclick=async()=>{b.disabled=true;try{BIP.prompt();const r=await BIP.userChoice;BIP=null;if(r&&r.outcome==='accepted'){try{localStorage.setItem('rr_inst','1')}catch(e){};return home()}}catch(e){}instalar()};
+}
+
 /* ---------- home ---------- */
 function home(){
   VIEW='home'; newGame();
@@ -405,11 +449,12 @@ function home(){
   <div style="font-size:clamp(14px,4.2vw,16px);line-height:1.45;font-weight:500">Gira, responde, enche o medidor. Escolhe quem vai pro teu bonde e prova que conhece. Fechou os 5? Rainha da roda. ${CFG.vidas} vida${CFG.vidas===1?'':'s'}, sem vacilo.</div></div>
   <div style="margin-top:auto;padding-top:6px" class="stack">${duelBanner()}${sb&&!AUTH.uid?`<button class="btn sm" id="acct" style="background:#fff">${GOOGLE}ENTRAR COM GOOGLE</button>`:''}<button class="btn" id="go"><svg width="20" height="22" viewBox="0 0 22 24" aria-hidden="true"><path d="M3 2 L20 12 L3 22 Z" fill="#1a1a1a"/></svg>JOGAR</button>
   <div class="grid2"><button class="btn sm" id="criar" style="background:#18A36A">+ PERGUNTA</button><button class="btn sm" id="com" style="background:#3C7DD9;color:#fff">COMUNIDADE${pedidosNovos()?`<span class="badge">${pedidosNovos()}</span>`:''}</button></div>
-  <div class="small" style="text-align:center">Recorde: ${best()} pts</div></div>`);
+  <div class="small" style="text-align:center">Recorde: ${best()} pts${podeInstalar()?` · <button id="instlink" style="background:none;border:0;padding:0;font:inherit;color:#3C7DD9;text-decoration:underline;cursor:pointer">instalar no celular</button>`:''}</div></div>`);
   bindAcct();
   document.getElementById('go').onclick=wheel;
   document.getElementById('criar').onclick=criar;
   document.getElementById('com').onclick=()=>comunidade();
+  const il=document.getElementById('instlink'); if(il) il.onclick=instalar;
   const db=document.getElementById('dban'); if(db) db.onclick=()=>{const d=duelosMinhaVez()[0];jogarDuelo(d.id,d.vulgo)};
 }
 function duelBanner(){
@@ -714,21 +759,48 @@ function escolherVulgo(top,atual){
 const redeBox=()=>document.getElementById('rede');
 const vazioRede=t=>`<div class="card" style="padding:16px;text-align:center;font-weight:600;line-height:1.45">${t}</div>`;
 async function redeRanking(){
-  if(!REDE.rank){const {data}=await sb.rpc('ranking_amigos');REDE.rank=data||[]}
-  const b=redeBox();if(!b||REDE.tab!=='ranking')return;
-  const L=REDE.rank;
-  if(L.length<2){b.innerHTML=vazioRede('Ainda tá só tu na roda. Adiciona os parça pelo vulgo e vê quem manda.')+(L[0]?rankCard(L[0],1):'');return}
-  b.innerHTML=L.map((r,i)=>rankCard(r,i+1)).join('');bindDesafiar(b);
+  const esc0=REDE.escopo||'parcas', modo=REDE.modo||'recorde', key=esc0+':'+modo;
+  const b0=redeBox();
+  const seg=(name,opts,cur)=>`<div class="seg">${opts.map(([k,l])=>`<button class="${cur===k?'on':''}" data-${name}="${k}">${l}</button>`).join('')}</div>`;
+  const topo=`<div style="display:flex;gap:8px;flex-wrap:wrap">${seg('esc',[['parcas','Parças'],['geral','Geral']],esc0)}${seg('modo',[['recorde','Recorde'],['duelos','Duelos']],modo)}</div>`;
+  if(b0&&!(REDE.rank&&REDE.rank[key])) b0.innerHTML=topo+'<div class="small">Carregando…</div>';
+  const bind=()=>{
+    document.querySelectorAll('[data-esc]').forEach(x=>x.onclick=()=>{REDE.escopo=x.dataset.esc;redeRanking()});
+    document.querySelectorAll('[data-modo]').forEach(x=>x.onclick=()=>{REDE.modo=x.dataset.modo;redeRanking()});
+  };
+  bind();
+  if(!REDE.rank) REDE.rank={};
+  if(!REDE.rank[key]){
+    const {data}=esc0==='geral'?await sb.rpc('ranking_geral',{modo}):await sb.rpc('ranking_amigos',{modo});
+    REDE.rank[key]=esc0==='geral'?(data||{lista:[],eu:null,total:0}):{lista:data||[]};
+  }
+  const b=redeBox();if(!b||REDE.tab!=='ranking'||(REDE.escopo||'parcas')!==esc0||(REDE.modo||'recorde')!==modo)return;
+  const R=REDE.rank[key];let L=R.lista;
+  if(esc0==='parcas') L=L.map((r,i)=>({...r,pos:i+1}));
+  if(esc0==='parcas'&&modo==='duelos') L=L.filter(r=>r.eu||r.duelos_v+r.duelos_d+r.duelos_e>0).map((r,i)=>({...r,pos:i+1}));
+  let h=topo;
+  if(esc0==='parcas'&&(R.lista.length<2)) h+=vazioRede('Ainda tá só tu na roda. Adiciona os parça pelo vulgo e vê quem manda.');
+  else if(esc0==='parcas'&&modo==='duelos'&&L.length<2) h+=vazioRede('Ninguém duelou ainda. Desafia um parça e abre o placar.');
+  if(esc0==='geral'&&!L.length) h+=vazioRede(modo==='duelos'?'Ainda não rolou nenhum duelo no jogo.':'Ainda ninguém com vulgo jogou.');
+  if(esc0==='geral'&&L.length) h+=`<div class="small" style="margin:0">${R.total} jogador${R.total==1?'':'es'} no ranking${modo==='duelos'?' de duelos':''} · top 50</div>`;
+  h+=L.map(r=>rankCard(r,r.pos,modo)).join('');
+  if(esc0==='geral'&&R.eu&&R.eu.pos>50) h+=`<div class="small" style="text-align:center;margin:0">…</div>`+rankCard(R.eu,R.eu.pos,modo);
+  if(esc0==='geral'&&!R.eu&&L.length) h+=`<div class="small" style="text-align:center">${modo==='duelos'?'Tu ainda não terminou nenhum duelo.':'Joga uma partida logado pra entrar no ranking.'}</div>`;
+  b.innerHTML=h;bind();bindDesafiar(b);
 }
-function rankCard(r,pos){
-  const med=['#F5A623','#C9CED6','#D9A066'][pos-1];
+function rankCard(r,pos,modo){
+  const med=['#F5A623','#C9CED6','#D9A066'][pos-1];const du=modo==='duelos';
+  const big=du?r.duelos_v:r.recorde, lab=du?(r.duelos_v==1?'vitória':'vitórias'):'recorde';
+  const linha=du?`${r.duelos_d} derrota${r.duelos_d==1?'':'s'}${r.duelos_e?` · ${r.duelos_e} empate${r.duelos_e==1?'':'s'}`:''} · ${r.aproveitamento}% aproveitamento`
+                :`${r.vitorias} vitória${r.vitorias==1?'':'s'} · ${r.partidas} partida${r.partidas==1?'':'s'} · ${r.acerto}% acerto`;
+  const uid=uidDoVulgo(r.vulgo);
   return `<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:4px 4px 0 #1a1a1a;${r.eu?'background:#FFF4DC;':''}">
   <div class="row" style="gap:10px;justify-content:flex-start">
-  <span class="bang" style="width:30px;height:30px;flex:0 0 30px;border-radius:50%;border:2.5px solid #1a1a1a;display:inline-flex;align-items:center;justify-content:center;font-size:18px;background:${med||'#fff'}">${pos}</span>
+  <span class="bang" style="min-width:30px;height:30px;flex:0 0 auto;padding:0 4px;border-radius:999px;border:2.5px solid #1a1a1a;display:inline-flex;align-items:center;justify-content:center;font-size:${pos>99?14:18}px;background:${med||'#fff'}">${pos}</span>
   ${foto(r,38)}
   <div style="flex:1;min-width:0"><div style="font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">@${esc(r.vulgo||'')}${r.eu?' <span class="tag" style="background:#1a1a1a;color:#fff;font-size:11px">você</span>':''}</div>
-  <div class="small" style="margin:0;font-size:12px;line-height:1.3">${r.vitorias} vitória${r.vitorias==1?'':'s'} · ${r.partidas} partida${r.partidas==1?'':'s'} · ${r.acerto}% acerto</div></div>
-  <div style="text-align:right"><div class="bang" style="font-size:22px;line-height:1">${r.recorde}</div><div class="small" style="margin:0;font-size:11px">recorde</div></div></div>${r.eu?'':`<div style="display:flex;justify-content:flex-end;margin-top:6px">${btnDesafiar(uidDoVulgo(r.vulgo),r.vulgo)}</div>`}</div>`;
+  <div class="small" style="margin:0;font-size:12px;line-height:1.3">${linha}</div></div>
+  <div style="text-align:right"><div class="bang" style="font-size:22px;line-height:1">${big}</div><div class="small" style="margin:0;font-size:11px">${lab}</div></div></div>${r.eu||!uid?'':`<div style="display:flex;justify-content:flex-end;margin-top:6px">${btnDesafiar(uid,r.vulgo)}</div>`}</div>`;
 }
 async function redeAtividade(){
   if(!REDE.feed){const {data}=await sb.rpc('atividade_amigos');REDE.feed=data||[]}
@@ -849,7 +921,7 @@ async function duelEnviar(){
   render(`<div class="small" style="text-align:center;margin-top:40px">Mandando teu placar…</div>`);
   let tent=0,res=null,err=null;
   while(tent<3&&!res){const r=await sb.rpc('enviar_duelo',{duelo:D.id,respostas:D.resp});if(r.error){err=r.error;tent++;await new Promise(z=>setTimeout(z,800))}else res=r.data}
-  await carregarDuelos();REDE.feed=null;
+  await carregarDuelos();REDE.feed=null;REDE.rank=null;
   const d=(REDE.duelos||[]).find(x=>x.id===D.id);
   duelFim(d,D.vulgo,res?null:erroMsg(err),res);
 }
@@ -1017,7 +1089,8 @@ async function admNumeros(){
   <div class="card" style="padding:12px 14px"><div class="bang" style="font-size:20px">POR CATEGORIA</div>${cats}</div>
   <div class="card" style="padding:12px 14px"><div class="bang" style="font-size:20px">AS QUE MAIS DERRUBAM</div>${piores}</div>`;
   const {data:du}=await sb.rpc('admin_duelos');const nd=document.getElementById('nduel');
-  if(nd&&du) nd.innerHTML=`<div class="bang" style="font-size:20px">DUELOS</div><div class="grid2" style="margin:6px 0">${stat('duelos criados',du.total)}${stat('terminados',du.concluidos)}${stat('esperando jogada',du.abertos)}${stat('nos últimos 7 dias',du.semana)}</div>${(du.top||[]).length?`<div class="small" style="margin:0">Quem mais duela: ${du.top.map(t=>`@${esc(t.vulgo||t.nome||'?')} (${t.n})`).join(', ')}</div>`:''}`;
+  if(nd&&du) nd.innerHTML=`<div class="bang" style="font-size:20px">DUELOS</div><div class="grid2" style="margin:6px 0">${stat('duelos criados',du.total)}${stat('terminados',du.concluidos)}${stat('esperando jogada',du.abertos)}${stat('nos últimos 7 dias',du.semana)}</div>${(du.top||[]).length?`<div class="small" style="margin:0 0 8px">Quem mais duela: ${du.top.map(t=>`@${esc(t.vulgo||t.nome||'?')} (${t.n})`).join(', ')}</div>`:''}
+  <div class="bang" style="font-size:18px;margin-top:4px">QUEM MAIS VENCE</div>${(du.vencedores||[]).length?du.vencedores.map((t,i)=>`<div class="row" style="padding:6px 0;border-bottom:1px solid #ddd"><span style="font-weight:800;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${i+1}. @${esc(t.vulgo||t.nome||'?')}</span><span class="small" style="margin:0;white-space:nowrap">${t.v}V · ${t.d}D${t.e?` · ${t.e}E`:''} · ${t.pct}%</span></div>`).join(''):'<div class="small">Ninguém venceu duelo ainda.</div>'}`;
 }
 
 async function admAjustes(){
@@ -1167,7 +1240,7 @@ async function admJogadores(){
 
 /* ---------- início ---------- */
 (async function boot(){
-  newGame(); home();
+  newGame(); if(precisaInstalar()) instalar(); else home();
   if(!sb) return;
   try{
     const {data}=await sb.auth.getSession();
