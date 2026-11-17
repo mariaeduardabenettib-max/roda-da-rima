@@ -134,6 +134,78 @@ img,svg{-webkit-user-drag:none}
 .seg button{border:0;background:transparent;font:800 13px 'Archivo',sans-serif;color:var(--ink);padding:7px 12px;cursor:pointer;min-height:36px}
 .seg button+button{border-left:2px solid var(--ink)}
 .seg button.on{background:var(--ink);color:#fff}
+/* ---------- demo animada de instalar ---------- */
+.dmwrap{display:flex;flex-direction:column;align-items:center;gap:10px}
+.dm{position:relative;width:220px;height:420px;border:6px solid var(--ink);border-radius:32px;overflow:hidden;background:var(--paper);box-shadow:5px 5px 0 var(--ink);font-family:-apple-system,'Archivo',sans-serif;color:#1a1a1a;flex:0 0 auto}
+@media (max-height:760px){.dm{transform:scale(.84);margin:-34px 0 -34px}}
+@media (max-height:640px){.dm{transform:scale(.7);margin:-63px 0 -63px}}
+.dm *{box-sizing:border-box}
+.dm .L{position:absolute;inset:0}
+
+.dm .pg.and{padding-top:66px}
+.dm .pg{background-color:#E8E6E1;background-image:radial-gradient(rgba(0,0,0,.07) .8px,transparent 1.1px);background-size:5px 5px;display:flex;flex-direction:column;align-items:center;padding:34px 14px 0;gap:10px}
+.dm .pg .t{font-family:'Bangers',sans-serif;font-size:40px;line-height:.9;color:#F5A623;-webkit-text-stroke:1.5px #1a1a1a;text-shadow:2px 2px 0 #1a1a1a;text-align:center;letter-spacing:1px}
+.dm .pg .av{display:flex;gap:4px}.dm .pg .av i{width:22px;height:22px;border-radius:50%;border:2px solid #1a1a1a}
+.dm .pg .cd{width:100%;height:52px;background:#fff;border:2.5px solid #1a1a1a;border-radius:12px;box-shadow:2px 2px 0 #1a1a1a}
+.dm .pg .bt{width:100%;height:30px;background:#F5A623;border:2.5px solid #1a1a1a;border-radius:10px;box-shadow:2px 2px 0 #1a1a1a;font-family:'Bangers',sans-serif;font-size:17px;display:flex;align-items:center;justify-content:center}
+.dm .sb{position:absolute;top:0;left:0;right:0;height:22px;font:700 10px -apple-system,sans-serif;display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:3}
+.dm .tb{position:absolute;left:0;right:0;bottom:0;height:46px;background:rgba(248,248,248,.96);border-top:1px solid #ddd;display:flex;align-items:center;justify-content:space-around;padding-bottom:6px}
+.dm .tb span{color:#3C7DD9;font-size:18px;line-height:1}
+.dm .ab{position:absolute;left:0;right:0;top:22px;height:34px;background:#f1f3f4;border-bottom:1px solid #ddd;display:flex;align-items:center;gap:6px;padding:0 8px}
+.dm .ab .u{flex:1;height:22px;border-radius:11px;background:#fff;border:1px solid #ddd;font:500 9px sans-serif;display:flex;align-items:center;padding-left:8px;color:#555}
+.dm .ab .k{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.dm .dim{background:rgba(0,0,0,.35)}
+.dm .sh{top:auto;height:250px;background:#f2f2f7;border-radius:16px 16px 0 0;padding:12px 10px}
+.dm .sh .hd{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.dm .sh .hd img,.dm .ic{width:30px;height:30px;border-radius:8px;border:1.5px solid #1a1a1a}
+.dm .sh .hd b{font:700 11px sans-serif}.dm .sh .hd s{display:block;text-decoration:none;font:400 9px sans-serif;color:#888}
+.dm .grp{background:#fff;border-radius:10px;overflow:hidden}
+.dm .row{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;font:500 11px sans-serif;border-bottom:1px solid #eee}
+.dm .row:last-child{border-bottom:0}
+.dm .add{background:#f2f2f7}
+.dm .add .nav{height:56px;padding:24px 10px 0;display:flex;align-items:center;justify-content:space-between;font:600 10.5px sans-serif}
+.dm .add .nav .x{color:#3C7DD9;font-weight:500}.dm .add .nav .ok{background:#3C7DD9;color:#fff;border-radius:12px;padding:5px 10px}
+.dm .add .grp{margin:10px}
+.dm .tg{width:30px;height:18px;border-radius:9px;background:#34C759;position:relative}.dm .tg:after{content:'';position:absolute;right:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.dm .home{background:linear-gradient(160deg,#7b6fd6,#e57aa8 60%,#f7b267);padding:46px 14px 0;display:grid;grid-template-columns:repeat(4,1fr);gap:16px 12px;align-content:start}
+.dm .home i{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.55);display:block;justify-self:center}
+.dm .home .me{width:38px;height:38px;border-radius:10px;border:1.5px solid #1a1a1a;justify-self:center}
+.dm .mn{left:auto;right:6px;top:52px;bottom:auto;width:132px;background:#fff;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.25);padding:4px 0}
+.dm .mn .row{height:30px;border:0;font-size:10.5px}
+.dm .dlg{left:16px;right:16px;top:140px;bottom:auto;background:#fff;border-radius:18px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.dm .dlg b{font:700 13px sans-serif;display:block;margin-bottom:10px}
+.dm .dlg .bts{display:flex;justify-content:flex-end;gap:14px;margin-top:14px;font:600 11px sans-serif;color:#1a73e8}
+.dm .hl{border-radius:8px}
+.dm .fg{position:absolute;left:0;top:0;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(26,26,26,.45);border:2px solid #fff;z-index:20;pointer-events:none}
+.dm .fg:after{content:'';position:absolute;inset:-6px;border-radius:50%;border:3px solid #F5A623;opacity:0}
+.dmcap{position:relative;height:44px;width:100%;max-width:320px}
+.dmcap>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center;font-weight:700;line-height:1.3;opacity:0}
+.dmcap>span b{flex:0 0 26px;height:26px;border-radius:50%;border:2.5px solid var(--ink);background:var(--or);font:400 16px 'Bangers',sans-serif;display:inline-flex;align-items:center;justify-content:center}
+/* linha do tempo: 11s, em loop */
+.dm .fg,.dm .fg:after,.dm .an,.dmcap>span{animation-duration:11s;animation-iteration-count:infinite;animation-timing-function:ease-in-out}
+.dmcap>span:nth-child(1){animation-name:dmC1}.dmcap>span:nth-child(2){animation-name:dmC2}.dmcap>span:nth-child(3){animation-name:dmC3}.dmcap>span:nth-child(4){animation-name:dmC4}
+@keyframes dmC1{0%,23%{opacity:1}26%,100%{opacity:0}}
+@keyframes dmC2{0%,24%{opacity:0}27%,53%{opacity:1}56%,100%{opacity:0}}
+@keyframes dmC3{0%,54%{opacity:0}57%,76%{opacity:1}79%,100%{opacity:0}}
+@keyframes dmC4{0%,77%{opacity:0}80%,97%{opacity:1}100%{opacity:0}}
+.dm .fg:after{animation-name:dmTap}
+@keyframes dmTap{0%,17%{opacity:0;transform:scale(.3)}19%{opacity:1;transform:scale(.5)}23%{opacity:0;transform:scale(1.5)}43%{opacity:0;transform:scale(.3)}45%{opacity:1;transform:scale(.5)}49%{opacity:0;transform:scale(1.5)}68%{opacity:0;transform:scale(.3)}70%{opacity:1;transform:scale(.5)}74%,100%{opacity:0;transform:scale(1.5)}}
+.dm .dimA{animation-name:dmDim}@keyframes dmDim{0%,25%{opacity:0}29%,54%{opacity:1}57%,100%{opacity:0}}
+.dm .shA{animation-name:dmSheet}@keyframes dmSheet{0%,25%{transform:translateY(105%)}31%,55%{transform:translateY(0)}58%,100%{transform:translateY(105%)}}
+.dm .addA{animation-name:dmAdd}@keyframes dmAdd{0%,54%{opacity:0;transform:translateY(20px)}58%,77%{opacity:1;transform:none}80%,100%{opacity:0}}
+.dm .homeA{animation-name:dmHome}@keyframes dmHome{0%,77%{opacity:0}80%,97%{opacity:1}100%{opacity:0}}
+.dm .meA{animation-name:dmPop}@keyframes dmPop{0%,81%{transform:scale(0)}86%{transform:scale(1.2)}89%,100%{transform:scale(1)}}
+.dm .hlA{animation-name:dmHl}@keyframes dmHl{0%,44%{background:transparent}45%,52%{background:#dcdcdc}53%,100%{background:transparent}}
+.dm .shareA{animation-name:dmHl1}@keyframes dmHl1{0%,18%{background:transparent}19%,24%{background:#dde7f7}25%,100%{background:transparent}}
+.dm .okA{animation-name:dmHl3}@keyframes dmHl3{0%,69%{filter:none}70%,74%{filter:brightness(1.35)}75%,100%{filter:none}}
+.dm .mnA{animation-name:dmMenu}@keyframes dmMenu{0%,25%{opacity:0;transform:scale(.6);transform-origin:top right}29%,54%{opacity:1;transform:scale(1);transform-origin:top right}56%,100%{opacity:0}}
+.dm .dlgA{animation-name:dmDlg}@keyframes dmDlg{0%,54%{opacity:0;transform:scale(.8)}58%,77%{opacity:1;transform:none}80%,100%{opacity:0}}
+.dm .fgI{animation-name:dmFI}
+@keyframes dmFI{0%{opacity:0;transform:translate(160px,300px)}7%{opacity:1;transform:translate(140px,330px)}15%,23%{opacity:1;transform:translate(104px,383px)}32%{transform:translate(150px,280px)}41%,49%{transform:translate(70px,296px)}58%{transform:translate(120px,200px)}66%,74%{opacity:1;transform:translate(163px,40px)}79%,100%{opacity:0;transform:translate(170px,120px)}}
+.dm .fgA{animation-name:dmFA}
+@keyframes dmFA{0%{opacity:0;transform:translate(130px,240px)}7%{opacity:1;transform:translate(160px,160px)}15%,23%{opacity:1;transform:translate(191px,38px)}32%{transform:translate(150px,200px)}41%,49%{transform:translate(150px,161px)}58%{transform:translate(120px,320px)}66%,74%{opacity:1;transform:translate(140px,242px)}79%,100%{opacity:0;transform:translate(160px,330px)}}
+@media (prefers-reduced-motion:reduce){.dm .fg{display:none}}
+@keyframes dmDlgDim{0%,54%{opacity:0}58%,77%{opacity:1}80%,100%{opacity:0}}
 
 </style>
 </head>
@@ -412,6 +484,37 @@ window.addEventListener('appinstalled',()=>{try{localStorage.setItem('rr_inst','
 const IC_SHARE=`<svg width="22" height="26" viewBox="0 0 22 26" aria-hidden="true"><path d="M7 9H4.5A1.5 1.5 0 0 0 3 10.5v12A1.5 1.5 0 0 0 4.5 24h13a1.5 1.5 0 0 0 1.5-1.5v-12A1.5 1.5 0 0 0 17.5 9H15" fill="none" stroke="#3C7DD9" stroke-width="2.2" stroke-linecap="round"/><path d="M11 16V2M6.5 6.5 11 2l4.5 4.5" fill="none" stroke="#3C7DD9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const IC_DOTS=`<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><circle cx="11" cy="4" r="2.2" fill="#1a1a1a"/><circle cx="11" cy="11" r="2.2" fill="#1a1a1a"/><circle cx="11" cy="18" r="2.2" fill="#1a1a1a"/></svg>`;
 const IC_PLUS=`<svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true"><rect x="2" y="2" width="18" height="18" rx="4" fill="none" stroke="#1a1a1a" stroke-width="2.2"/><path d="M11 7v8M7 11h8" stroke="#1a1a1a" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+function demoPagina(android){
+  return `<div class="L pg${android?' and':''}"><div class="t">RODA DA<br>RIMA</div><div class="av">${['#F5A623','#E64B55','#18A36A','#3C7DD9','#8E2E43','#B9A9D9'].map(c=>`<i style="background:${c}"></i>`).join('')}</div><div class="cd"></div><div class="bt">▶ JOGAR</div></div>`;
+}
+function demoInstalar(android){
+  const ICON='/apple-touch-icon.png';
+  const sb=`<div class="sb"><span>12:00</span><span>●●● ▮</span></div>`;
+  const home=`<div class="L home homeA an">${Array.from({length:10},(_,i)=>i===6?`<img class="me meA an" src="${ICON}" alt="">`:'<i></i>').join('')}</div>`;
+  let tela,caps;
+  if(!android){
+    tela=`${demoPagina()}
+    <div class="tb"><span>‹</span><span>›</span><span class="hl shareA an" style="padding:3px 6px">${IC_SHARE.replace('width="22" height="26"','width="16" height="19"')}</span><span>⧉</span><span>☐</span></div>
+    <div class="L dim dimA an"></div>
+    <div class="L sh shA an"><div class="hd"><img src="${ICON}" alt=""><div><b>Roda da Rima</b><s>roda-da-rima.vercel.app</s></div></div>
+      <div class="grp"><div class="row">Copiar <span>⧉</span></div><div class="row">Adicionar aos Favoritos <span>☆</span></div><div class="row hlA an">Adicionar à Tela de Início <span>⊞</span></div><div class="row">Adicionar à Lista de Leitura <span>👓</span></div></div></div>
+    <div class="L add addA an"><div class="nav"><span class="x">Cancelar</span><span>Tela de Início</span><span class="ok okA an">Adicionar</span></div>
+      <div class="grp"><div class="row" style="height:48px;justify-content:flex-start;gap:10px"><img class="ic" src="${ICON}" alt="">Roda da Rima</div></div>
+      <div class="grp"><div class="row">Abrir como app web <span class="tg"></span></div></div></div>
+    ${home}<div class="fg fgI an"></div>`;
+    caps=['Toca em <b style="flex:0 0 auto;width:auto;padding:0 6px;border-radius:8px;background:#fff">Compartilhar</b>','Escolhe <u>Adicionar à Tela de Início</u>','Toca em <u>Adicionar</u>','Pronto! Abre pelo ícone'];
+  } else {
+    tela=`${demoPagina(true)}
+    <div class="ab"><span class="k">⌂</span><div class="u">roda-da-rima.vercel.app</div><span class="k hl shareA an">${IC_DOTS.replace('width="22" height="22"','width="14" height="14"')}</span></div>
+    <div class="L mn mnA an"><div class="row">Nova guia</div><div class="row">Histórico</div><div class="row">Favoritos</div><div class="row hlA an" style="font-weight:700">Instalar app</div><div class="row">Configurações</div></div>
+    <div class="L dim dimA an" style="animation-name:dmDlgDim"></div>
+    <div class="L dlg dlgA an"><b>Instalar app</b><div style="display:flex;gap:10px;align-items:center;font:500 11px sans-serif"><img class="ic" src="${ICON}" alt="">Roda da Rima<br>roda-da-rima.vercel.app</div><div class="bts"><span>Cancelar</span><span class="okA an" style="background:#1a73e8;color:#fff;border-radius:14px;padding:5px 12px">Instalar</span></div></div>
+    ${home}<div class="fg fgA an"></div>`;
+    caps=['Toca nos <b style="flex:0 0 auto;background:#fff">⋮</b> do navegador','Toca em <u>Instalar app</u>','Confirma em <u>Instalar</u>','Pronto! Abre pelo ícone'];
+  }
+  return `<div class="dmwrap"><div class="dm" role="img" aria-label="Animação mostrando como instalar a Roda da Rima na tela de início">${sb}${tela}</div>
+  <div class="dmcap">${caps.map((c,i)=>`<span>${i<3?`<b>${i+1}</b>`:''}<em style="font-style:normal">${c}</em></span>`).join('')}</div></div>`;
+}
 function instalar(){
   VIEW='instalar';
   const passo=(n,ic,t)=>`<div class="card" style="padding:10px 12px;border-radius:16px;box-shadow:3px 3px 0 #1a1a1a"><div class="row" style="gap:12px;justify-content:flex-start"><span class="bang" style="width:30px;height:30px;flex:0 0 30px;border-radius:50%;border:2.5px solid #1a1a1a;background:#F5A623;display:inline-flex;align-items:center;justify-content:center;font-size:18px">${n}</span><span style="flex:1;font-weight:600;line-height:1.4">${t}</span>${ic?`<span style="flex:0 0 auto">${ic}</span>`:''}</div></div>`;
@@ -420,17 +523,13 @@ function instalar(){
     topo='Tu tá no navegador de dentro de outro app. Pra instalar, abre a Roda no navegador do celular:';
     passos=passo(1,IC_DOTS,'Toca nos <b>⋯</b> (ou ⋮) no canto da tela.')+passo(2,'',`Escolhe <b>Abrir no ${IOS?'Safari':'navegador'}</b>.`)+passo(3,'','Lá, volta aqui e segue o passo a passo.');
   } else if(IOS){
-    passos=passo(1,IC_SHARE,'Toca no botão <b>Compartilhar</b>. Se não aparecer, toca nos <b>⋯</b> primeiro.')
-      +passo(2,IC_PLUS,'Rola a lista e toca em <b>Adicionar à Tela de Início</b>.')
-      +passo(3,'','Deixa <b>Abrir como app web</b> ligado e toca em <b>Adicionar</b>.');
-  } else if(BIP){
-    passos=`<button class="btn" id="instnow" style="background:#18A36A">INSTALAR AGORA</button>`;
+    passos=demoInstalar(false)+`<div class="small" style="text-align:center;margin:0">Não achou o Compartilhar? Toca nos <b>⋯</b> da barra primeiro.</div>`;
   } else {
-    passos=passo(1,IC_DOTS,'Toca nos <b>⋮</b> no canto de cima do navegador.')+passo(2,IC_PLUS,'Toca em <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.')+passo(3,'','Confirma em <b>Instalar</b>.');
+    passos=demoInstalar(true)+(BIP?`<button class="btn" id="instnow" style="background:#18A36A">INSTALAR AGORA</button>`:`<div class="small" style="text-align:center;margin:0">Pode aparecer como <b>Adicionar à tela inicial</b>.</div>`);
   }
   render(`<h2 class="title3d t-l" style="margin-top:6px">BOTA A RODA<br>NO CELULAR</h2>
-  <div style="display:flex;justify-content:center"><img src="/apple-touch-icon.png" alt="Ícone da Roda da Rima" width="84" height="84" style="border-radius:20px;border:3px solid #1a1a1a;box-shadow:4px 4px 0 #1a1a1a;background:#F5A623"></div>
-  <div style="text-align:center;font-weight:600;line-height:1.45">${topo||'Fica igual app: abre direto da tela de início, em tela cheia, sem barra do navegador.'}</div>
+  ${INAPP?`<div style="display:flex;justify-content:center"><img src="/apple-touch-icon.png" alt="Ícone da Roda da Rima" width="84" height="84" style="border-radius:20px;border:3px solid #1a1a1a;box-shadow:4px 4px 0 #1a1a1a;background:#F5A623"></div>`:''}
+  <div class="${INAPP?'':'hide-short'}" style="text-align:center;font-weight:600;line-height:1.4">${topo||'Fica igual app: abre direto da tela de início, em tela cheia.'}</div>
   <div class="stack" style="gap:10px">${passos}</div>
   <div style="margin-top:auto" class="stack"><button class="btn sm" id="instok" style="background:#fff">AGORA NÃO, JOGAR NO NAVEGADOR</button></div>`);
   document.getElementById('instok').onclick=()=>{try{localStorage.setItem('rr_inst','1')}catch(e){};home()};
